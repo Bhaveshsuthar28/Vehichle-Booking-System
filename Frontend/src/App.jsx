@@ -8,6 +8,7 @@ import { Home } from "./pages/Home.page.jsx"
 import { UserProtectedWrapper } from "./context/User.Protected.jsx"
 import { CapatainHome } from "./pages/captain.home.page.jsx"
 import { CaptainProtectedWrapper } from "./context/Captain.Protected.jsx"
+import { RidingLive } from "./pages/Riding.User.page.jsx"
 
 function App() {
   return (
@@ -18,6 +19,11 @@ function App() {
         <Route path="/user-signup" element={<UserSignUp/>} />
         <Route path="/captain-login" element={<CaptainLogin/>} />
         <Route path="/captain-signup" element={<CaptainSignUp/>} />
+        <Route path="/riding" element={
+          <UserProtectedWrapper>
+            <RidingLive/>
+          </UserProtectedWrapper>
+        }/>
         <Route path="/home" element={
           <UserProtectedWrapper>
             <Home/>

@@ -4,4 +4,4 @@ export const CapatainHome = () => {
             <h1>home</h1>
         </>
     )
-}
+}  

@@ -127,7 +127,7 @@ export const Home = () => {
             <img className="w-16 absolute left-5 top-5" src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"/>
 
             <div className="h-screen w-screen z-0 absolute top-0 left-0">
-                <img className="w-full h-full object-cover" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjgBWkh-2RpEXtRmA1vxakcVsTzG3XVMnd3Q&s"/>
+                <img className="w-full h-full object-cover" src="https://images.prismic.io/superpupertest/75d32275-bd15-4567-a75f-76c4110c6105_1*mleHgMCGD-A1XXa2XvkiWg.png?auto=compress,format&w=1966&h=1068"/>
             </div>
 
             <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
