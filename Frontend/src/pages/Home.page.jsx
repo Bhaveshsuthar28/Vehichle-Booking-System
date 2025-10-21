@@ -7,6 +7,7 @@ import {VehiclePanel} from '../components/Vehicle.price.components.jsx'
 import { ConfirmedVehicle } from "../components/Confirmed.vehicle.jsx";
 import { LookingRide } from "../components/LookingForDriver.jsx";
 import { WaitingForDRiver } from "../components/WaitingForDriverPanel.jsx";
+import { Link } from "react-router-dom";
 
 export const Home = () => {
 
@@ -124,6 +125,11 @@ export const Home = () => {
  
     return(
         <div className="h-screen relative overflow-hidden">
+            <Link to='' className="fixed h-10 w-10 flex items-center justify-center rounded-full top-2 left-2 
+                bg-white/10 backdrop-blur-md border border-blue-900 shadow-lg active:bg-blue-900 transition duration-100">
+                <Home className="text-blue-700 active:text-white duration-100"/>
+            </Link>
+
             <img className="w-16 absolute left-5 top-5" src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"/>
 
             <div className="h-screen w-screen z-0 absolute top-0 left-0">

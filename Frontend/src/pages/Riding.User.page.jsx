@@ -1,13 +1,14 @@
 import { LocateFixed, Home , Wallet , Star} from "lucide-react"
+import {Link} from "react-router-dom"
 
 
 export const RidingLive = () => {
     return(
         <div className="h-screen">
-            <div className="fixed h-10 w-10 flex items-center justify-center rounded-full top-2 left-2 
+            <Link to='/home' className="fixed h-10 w-10 flex items-center justify-center rounded-full top-2 left-2 
                 bg-white/10 backdrop-blur-md border border-blue-900 shadow-lg active:bg-blue-900 transition duration-100">
                 <Home className="text-blue-700 active:text-white duration-100"/>
-            </div>
+            </Link>
 
             <div className="h-[40%]">
                 <img className="h-full w-full object-cover" src="https://images.prismic.io/superpupertest/75d32275-bd15-4567-a75f-76c4110c6105_1*mleHgMCGD-A1XXa2XvkiWg.png?auto=compress,format&w=1966&h=1068"/>

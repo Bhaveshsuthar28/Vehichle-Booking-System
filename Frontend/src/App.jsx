@@ -9,6 +9,7 @@ import { UserProtectedWrapper } from "./context/User.Protected.jsx"
 import { CapatainHome } from "./pages/captain.home.page.jsx"
 import { CaptainProtectedWrapper } from "./context/Captain.Protected.jsx"
 import { RidingLive } from "./pages/Riding.User.page.jsx"
+import 'remixicon/fonts/remixicon.css'
 
 function App() {
   return (
