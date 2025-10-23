@@ -9,4 +9,10 @@ MapRouter.get('/get-coordinate' ,
     query('address').isString().isLength({min : 3})
     , authUser , MapController)
 
+MapRouter.get('/get-distance-time',
+    query('origin').isString().isLength({min : 3}),
+    query('destination').isString().isLength({min : 3}),
+    authUser, MapController
+)
+
 export {MapRouter}

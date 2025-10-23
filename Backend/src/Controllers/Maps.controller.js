@@ -8,7 +8,7 @@ export const MapController = async(req , res , next) => {
     }
 
     const {address} = req.query;
-    
+
     try {
         const coordinate = await GetLocationCoordinate(address)
 
@@ -16,4 +16,8 @@ export const MapController = async(req , res , next) => {
     } catch (error) {
         res.status(404).json({message : 'Coordinates not found'})
     }
+}
+
+export const GetDistanceTime = async(req , res , next) => {
+    
 }

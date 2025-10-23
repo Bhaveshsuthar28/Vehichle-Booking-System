@@ -23,3 +23,31 @@ export const GetLocationCoordinate = async(address) => {
         throw error;
     }
 }
+
+export const GetDistanceTime = async(origin , destination) => {
+    if(!origin || !destination){
+        throw new Error('Origin and destination are required');
+    }
+
+    const Apikey = process.env.GOOGLE_MAP_API;
+
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&key=${Apikey}`;
+
+    try {
+        const response = await axios.get(url);
+
+        if(response.data.status === 'OK'){
+
+            if(response.data.rows[0].elements[0].status === 'ZERO_RESULTS'){
+                throw new Error('No routes found')
+            }
+
+            return response.data.rows[0].elements[0];
+        }
+        else{
+            throw new Error('Unable to fetch distance and time')
+        }
+    } catch (error) {
+      throw new error  
+    }
+}
