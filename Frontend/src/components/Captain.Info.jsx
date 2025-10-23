@@ -1,5 +1,5 @@
 
-export const CaptainInfo = () => {
+export const CaptainInfo = ({setridePopupPanel}) => {
     return(
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between w-full">
@@ -13,7 +13,7 @@ export const CaptainInfo = () => {
                 </div>
             </div>
 
-            <div className="flex justify-between gap-5 items-start bg-gray-200 p-5 text-black border-2 border-green-600 rounded-3xl [">
+            <div onClick={() => { setridePopupPanel(true)}} className="flex justify-between gap-5 items-start bg-gray-200 p-5 text-black border-2 border-green-600 rounded-3xl">
                 <div className="text-center flex-1">
                     <i className="text-2xl ri-timer-2-line"></i>
                     <h5 className="text-lg font-medium">10.2</h5>

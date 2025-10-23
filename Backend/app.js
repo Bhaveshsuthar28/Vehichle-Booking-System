@@ -3,6 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import { UserRouter } from "./src/Routes/user.route.js";
 import { CaptainRouter } from "./src/Routes/captain.route.js";
+import { MapRouter } from "./src/Routes/maps.routes.js";
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.use(express.static('public'))
 
 app.use('/api/users' , UserRouter);
 app.use('/api/captains',CaptainRouter)
+app.use('/api/maps', MapRouter)
 
 export {app}

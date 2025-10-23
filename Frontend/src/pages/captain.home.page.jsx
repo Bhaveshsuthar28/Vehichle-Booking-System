@@ -2,9 +2,40 @@ import { LogOut} from "lucide-react"
 import { Link } from "react-router-dom"
 import { CaptainInfo } from "../components/Captain.Info.jsx"
 import { RidePopUp } from "../components/RidePopUp.jsx"
-
+import { useRef, useState } from "react"
+import { useGSAP } from "@gsap/react"
+import gsap from "gsap"
+import { ConfirmRidePopup } from "../components/ConfirmridePopup.jsx"
 
 export const CapatainHome = () => {
+    const [ridePopupPanel , setridePopupPanel] = useState(false);
+    const [ConfirmridePopupPanel , setConfirmridePopupPanel] = useState(false);
+
+    const ridepopUpRef = useRef(null);
+    const ConfirmRideRef = useRef(null);
+
+    
+    
+    useGSAP(() => {
+        if(!ridepopUpRef.current) return;
+        
+        gsap.to(ridepopUpRef.current , {
+            yPercent : ridePopupPanel ? 0 : 100,
+            duration : 0.4,
+            ease : 'power2.out'
+        })
+    }, [ridePopupPanel])
+
+    useGSAP(() => {
+        if(!ConfirmRideRef.current) return;
+        
+        gsap.to(ConfirmRideRef.current , {
+            yPercent : ConfirmridePopupPanel ? 0 : 100,
+            duration : 0.4,
+            ease : 'power2.out'
+        })
+    }, [ConfirmridePopupPanel])
+
     return(
         <div className="h-screen">
             <div className="fixed p-6 top-0 flex items-center justify-between w-screen">
@@ -19,11 +50,15 @@ export const CapatainHome = () => {
             </div>
 
             <div className="h-[40%] p-6">
-                <CaptainInfo/>
+                <CaptainInfo setridePopupPanel={setridePopupPanel}/>
             </div>
 
-            <div className="fixed bottom-0 z-10 w-full bg-white px-3 py-6 pt-12">
-                <RidePopUp/>
+            <div ref={ridepopUpRef} className="fixed bottom-0 z-10 w-full bg-white px-3 py-6 pt-12">
+                <RidePopUp setridePopupPanel={setridePopupPanel} setConfirmridePopupPanel={setConfirmridePopupPanel}/>
+            </div>
+
+            <div ref={ConfirmRideRef} className="fixed bottom-0 h-screen z-10 w-full bg-white px-3 py-6 pt-12">
+                <ConfirmRidePopup setConfirmridePopupPanel={setConfirmridePopupPanel} setridePopupPanel={setridePopupPanel}/>
             </div>
         </div>
     )

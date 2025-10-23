@@ -3,7 +3,7 @@ import { LocateFixed, Pin, Wallet } from "lucide-react";
 export const UserInfoForDriver = () => {
   return (
     <div className="flex flex-col gap-5 p-4 w-full">
-      <div className="flex items-center justify-between w-full bg-yellow-600 px-4 py-3 rounded-xl ">
+      <div className="flex items-center justify-between w-full border-2 border-yellow-600 px-4 py-3 rounded-xl ">
         <div className="flex items-center gap-3">
           <img
             className="h-12 w-12 rounded-full object-cover"
