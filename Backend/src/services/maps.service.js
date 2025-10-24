@@ -51,3 +51,25 @@ export const GetDistanceTime = async(origin , destination) => {
       throw new error  
     }
 }
+
+export const GetLocationSuggestions = async(input) => {
+    if(!input){
+        throw new Error('query is required')
+    }
+
+    const ApiKey = process.env.GOOGLE_MAP_API;
+
+    const url = `https://maps.googleapis.com/maps/api/autocomplete/json?input=${encodeURIComponent(input)}&key=${ApiKey}`;
+    try {
+        const response = await axios.get(url);
+        if(response.data.status === 'OK'){
+            return response.data.predictions;
+        }
+        else{
+            throw new Error('Unable to fetch suggestions')
+        }
+    } catch (error) {
+        console.error(error.message);
+        throw error;
+    }
+}
