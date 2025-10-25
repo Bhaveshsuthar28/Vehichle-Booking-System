@@ -1,90 +1,58 @@
-import { Suspense, lazy } from "react";
-import { Route, Routes } from "react-router-dom";
-import { UserProtectedWrapper } from "./context/User.Protected.jsx";
-import { CaptainProtectedWrapper } from "./context/Captain.Protected.jsx";
-import { LoaderContent } from "./components/Loader.Content.Components.jsx";
 import "remixicon/fonts/remixicon.css";
+import { Route as RouterRoute, Routes as RouterRoutes } from "react-router-dom";
+import { UserProtectedWrapper as RequireUser } from "./context/User.Protected.jsx";
+import { CaptainProtectedWrapper as RequireCaptain } from "./context/Captain.Protected.jsx";
+import { Starter } from "./pages/Starter.page.jsx";
+import { UserLogin } from "./pages/userLogin.page.jsx";
+import { UserSignUp } from "./pages/userSignup.page.jsx";
+import { CaptainLogin } from "./pages/captainLogin.page.jsx";
+import { CaptainSignUp } from "./pages/captainSignup.page.jsx";
+import { Home } from "./pages/Home.page.jsx";
+import { CapatainHome } from "./pages/captain.home.page.jsx";
+import { RidingLive } from "./pages/Riding.User.page.jsx";
+import { CaptainRiding } from "./pages/CaptainRiding.page.jsx";
 
-const Starter = lazy(() =>
-  import("./pages/Starter.page.jsx").then((module) => ({ default: module.Starter }))
+
+const App = () => (
+  <RouterRoutes>
+    <RouterRoute path="/" element={<Starter />} />
+    <RouterRoute path="/user-login" element={<UserLogin />} />
+    <RouterRoute path="/user-signup" element={<UserSignUp />} />
+    <RouterRoute path="/captain-login" element={<CaptainLogin />} />
+    <RouterRoute path="/captain-signup" element={<CaptainSignUp />} />
+    <RouterRoute
+      path="/riding"
+      element={
+        <RequireUser>
+          <RidingLive />
+        </RequireUser>
+      }
+    />
+    <RouterRoute
+      path="/captain-riding"
+      element={
+        <RequireCaptain>
+          <CaptainRiding />
+        </RequireCaptain>
+      }
+    />
+    <RouterRoute
+      path="/home"
+      element={
+        <RequireUser>
+          <Home />
+        </RequireUser>
+      }
+    />
+    <RouterRoute
+      path="/captain-home"
+      element={
+        <RequireCaptain>
+          <CapatainHome />
+        </RequireCaptain>
+      }
+    />
+  </RouterRoutes>
 );
-
-const UserLogin = lazy(() =>
-  import("./pages/userLogin.page.jsx").then((module) => ({ default: module.UserLogin }))
-);
-
-const UserSignUp = lazy(() =>
-  import("./pages/userSignup.page.jsx").then((module) => ({ default: module.UserSignUp }))
-);
-
-const CaptainLogin = lazy(() =>
-  import("./pages/captainLogin.page.jsx").then((module) => ({ default: module.CaptainLogin }))
-);
-
-const CaptainSignUp = lazy(() =>
-  import("./pages/captainSignup.page.jsx").then((module) => ({ default: module.CaptainSignUp }))
-);
-
-const Home = lazy(() =>
-  import("./pages/Home.page.jsx").then((module) => ({ default: module.Home }))
-);
-
-const CapatainHome = lazy(() =>
-  import("./pages/captain.home.page.jsx").then((module) => ({ default: module.CapatainHome }))
-);
-
-const RidingLive = lazy(() =>
-  import("./pages/Riding.User.page.jsx").then((module) => ({ default: module.RidingLive }))
-);
-
-const CaptainRiding = lazy(() => 
-  import("./pages/CaptainRiding.page.jsx").then((module) => ({ default : module.CaptainRiding}))
-);
-
-function App() {
-  return (
-    <Suspense fallback={<LoaderContent />}>
-      <Routes>
-        <Route path="/" element={<Starter />} />
-        <Route path="/user-login" element={<UserLogin />} />
-        <Route path="/user-signup" element={<UserSignUp />} />
-        <Route path="/captain-login" element={<CaptainLogin />} />
-        <Route path="/captain-signup" element={<CaptainSignUp />} />
-        <Route
-          path="/riding"
-          element={
-            <UserProtectedWrapper>
-              <RidingLive />
-            </UserProtectedWrapper>
-          }
-        />
-        <Route
-          path="/captain-riding"
-          element={
-            <CaptainProtectedWrapper>
-              <CaptainRiding />
-            </CaptainProtectedWrapper>
-          }
-        />
-        <Route
-          path="/home"
-          element={
-            <UserProtectedWrapper>
-              <Home />
-            </UserProtectedWrapper>
-          }
-        />
-        <Route
-          path="/captain-home"
-          element={
-            <CaptainProtectedWrapper>
-              <CapatainHome />
-            </CaptainProtectedWrapper>
-          }
-        />
-      </Routes>
-    </Suspense>
-  );
-}
 
 export default App;

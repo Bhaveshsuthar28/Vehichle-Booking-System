@@ -1,9 +1,9 @@
 import { validationResult } from "express-validator";
-import { GetLocationCoordinate, GetLocationSuggestions } from "../services/maps.service.js"
+import { GetDistanceTime as GetDistanceTimeService , GetLocationCoordinate, GetLocationSuggestions } from "../services/maps.service.js"
 
 export const MapController = async(req , res , next) => {
     const errors = validationResult(req);
-    if(errors.isEmpty()){
+    if(!errors.isEmpty()){
         return res.status(400).json({errors : errors.array()})
     }
 
@@ -21,7 +21,7 @@ export const MapController = async(req , res , next) => {
 export const GetDistanceTime = async(req , res , next) => {
 
     const errors = validationResult(req);
-    if(errors.isEmpty()){
+    if(!errors.isEmpty()){
         return res.status(400).json({errors : errors.array()})
     }
 
@@ -29,7 +29,7 @@ export const GetDistanceTime = async(req , res , next) => {
 
         const {origin , destination} = req.query;
 
-        const distanceTime = await GetDistanceTime(origin , destination);
+        const distanceTime = await GetDistanceTimeService(origin , destination);
 
         res.status(200).json(distanceTime);
     } catch (error) {

@@ -5,6 +5,7 @@ import App from './App.jsx'
 import {BrowserRouter} from "react-router-dom" 
 import UserContext from './context/User.Context.jsx'
 import CaptainContext from './context/Capatain.Context.jsx'
+import 'react-toastify/dist/ReactToastify.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

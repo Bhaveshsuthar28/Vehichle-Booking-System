@@ -1,18 +1,18 @@
 import axios from "axios"
 
 export const GetLocationCoordinate = async(address) => {
-    const Apikey = process.env.GOOGLE_MAP_API;
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${Apikey}`;
+    const Apikey = process.env.GEOAPIFY_API_KEY;
+    const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(address)}&apiKey=${Apikey}`;
 
     try {
         const response = await axios.get(url);
 
-        if(response.data.status === 'OK'){
-            const location = response.data.results[0].geometry.location;
+        if(response.data && response.data.features && response.data.features.length > 0){
+            const location = response.data.features[0].geometry.coordinates;
 
             return{
-                ltd : location.lat,
-                lng : location.lng
+                lat: location[1],
+                lng: location[0],
             };
         }
         else{
@@ -24,46 +24,58 @@ export const GetLocationCoordinate = async(address) => {
     }
 }
 
-export const GetDistanceTime = async(origin , destination) => {
-    if(!origin || !destination){
-        throw new Error('Origin and destination are required');
+
+export const GetDistanceTime = async (origin, destination) => {
+    if (!origin || !destination) {
+        throw new Error("Origin and destination are required");
     }
 
-    const Apikey = process.env.GOOGLE_MAP_API;
+    const ApiKey = process.env.GEOAPIFY_API_KEY;
 
-    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&key=${Apikey}`;
+    const originCoords = await GetLocationCoordinate(origin);
+    const destinationCoords = await GetLocationCoordinate(destination);
+
+    const url = `https://api.geoapify.com/v1/routing?waypoints=${originCoords.lat},${originCoords.lng}|${destinationCoords.lat},${destinationCoords.lng}&mode=drive&apiKey=${ApiKey}`;
 
     try {
         const response = await axios.get(url);
 
-        if(response.data.status === 'OK'){
+        if (
+        response.data && response.data.features && response.data.features.length > 0){
+            const info = response.data.features[0].properties;
 
-            if(response.data.rows[0].elements[0].status === 'ZERO_RESULTS'){
-                throw new Error('No routes found')
-            }
-
-            return response.data.rows[0].elements[0];
-        }
-        else{
-            throw new Error('Unable to fetch distance and time')
+            return {
+                distance: Number((info.distance / 1000).toFixed(2)),
+                time: Math.round(info.time / 60),
+            };
+        } else {
+            console.log("Geoapify raw response:", response.data);
+            throw new Error("Unable to fetch distance and time");
         }
     } catch (error) {
-      throw new error  
+        console.error("Geoapify Routing Error:", error.response?.data || error.message);
+        throw error;
     }
-}
+};
+
+
 
 export const GetLocationSuggestions = async(input) => {
     if(!input){
         throw new Error('query is required')
     }
 
-    const ApiKey = process.env.GOOGLE_MAP_API;
+    const ApiKey = process.env.GEOAPIFY_API_KEY;
 
-    const url = `https://maps.googleapis.com/maps/api/autocomplete/json?input=${encodeURIComponent(input)}&key=${ApiKey}`;
+    const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(input)}&apiKey=${ApiKey}`;
     try {
         const response = await axios.get(url);
-        if(response.data.status === 'OK'){
-            return response.data.predictions;
+        if(response.data && response.data.features && response.data.features.length > 0){
+            return response.data.features.map((place) => ({
+                name: place.properties.formatted,
+                lat: place.geometry.coordinates[1],
+                lng: place.geometry.coordinates[0],
+            }));
         }
         else{
             throw new Error('Unable to fetch suggestions')
