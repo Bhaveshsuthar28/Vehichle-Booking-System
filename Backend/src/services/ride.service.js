@@ -3,7 +3,7 @@ import { RideModel } from "../Models/Ride.model.js";
 import { GetDistanceTime} from "../services/maps.service.js"
 
 
-const GetFare = async(pickup , destination) => {
+export const GetFare = async(pickup , destination) => {
     if(!pickup || !destination){
         throw new Error('Pickup and destination are required');
     }

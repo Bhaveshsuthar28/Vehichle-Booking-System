@@ -1,13 +1,14 @@
 import { useRef, useState , useEffect} from "react";
 import {useGSAP} from "@gsap/react"
 import gsap from "gsap";
-import { ChevronDown} from 'lucide-react';
+import { ChevronDown , Home as HomeIcon} from 'lucide-react';
 import { LocationSearchPanel } from "../components/LocationPanel.components.jsx";
 import {VehiclePanel} from '../components/Vehicle.price.components.jsx'
 import { ConfirmedVehicle } from "../components/Confirmed.vehicle.jsx";
 import { LookingRide } from "../components/LookingForDriver.jsx";
 import { WaitingForDRiver } from "../components/WaitingForDriverPanel.jsx";
 import { Link } from "react-router-dom";
+import axios from 'axios'
 
 export const Home = () => {
 
@@ -24,9 +25,55 @@ export const Home = () => {
     const [confirmRidePanel , setconfirmRidePanel] = useState(false);
     const [lookingPanelOpen , setlookingPanelOpen] = useState(false);
     const [waitingDriverPanel , setwaitingDriverPanel] = useState(false)
+    const [pickupSuggestions , setpickupSuggestions] = useState([]);
+    const [destinationSuggestions , setdestinationSuggestions] = useState([]);
+    const [activeField , setactiveField] = useState(null); 
+
+    const HandlePickupChange = async(e) => {
+        setpick(e.target.value);
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/maps/get-suggestions`, {
+                    params : {input : e.target.value},
+                    headers : {
+                        Authorization : `Bearer ${localStorage.getItem('token')}`
+                    }
+                },
+            )
+
+            setpickupSuggestions(response.data)
+        } catch (error) {
+            console.log(error.message)
+        } 
+    }
+
+    const HandleDestinationChange = async(e) => {
+        setdestination(e.target.value);
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/maps/get-suggestions`, {
+                    params : {input : e.target.value},
+                    headers : {
+                        Authorization : `Bearer ${localStorage.getItem('token')}`
+                    }
+                },
+            )
+
+            setdestinationSuggestions(response.data)
+        } catch (error) {
+            console.log(error.message)
+        } 
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
+    };
+
+    const handlePanelClose = () => {
+        setpanelOpen(false);
+        setactiveField(null);
+        setpickupSuggestions([]);
+        setdestinationSuggestions([]);
+        setpick('');
+        setdestination('');
     };
 
     useEffect(() => {
@@ -40,7 +87,7 @@ export const Home = () => {
     } ,[])
 
     useGSAP(function(){
-        if (!panelRef.current || !panelCloseRef.current) return;
+        if (!panelRef.current) return;
         if(panelOpen){
             gsap.to(panelRef.current , {
                 height : '70%',
@@ -48,10 +95,7 @@ export const Home = () => {
                 padding : 24,
                 duration : 0.4
             })
-            gsap.to(panelCloseRef.current , {
-                opacity : 1,
-                duration : 0.4
-            })
+            
         }else{
             gsap.to(panelRef.current , {
                 height : '0%',
@@ -59,10 +103,7 @@ export const Home = () => {
                 padding : 0,
                 duration : 0.4
             })
-            gsap.to(panelCloseRef.current , {
-                opacity : 0,
-                duration : 0.4
-            })
+            
         }
     } , [panelOpen])
 
@@ -122,12 +163,18 @@ export const Home = () => {
             ease : 'power2.out'
         })
     }, [waitingDriverPanel])
+
+
+    const FindTrip = () => {
+        setpanelOpen(false)
+        setvehiclePanelOpen(true)
+    }
  
     return(
         <div className="h-screen relative overflow-hidden">
-            <Link to='' className="fixed h-10 w-10 flex items-center justify-center rounded-full top-2 left-2 
+            <Link to="" className="fixed h-10 w-10 flex items-center justify-center rounded-full top-2 left-2 
                 bg-white/10 backdrop-blur-md border border-blue-900 shadow-lg active:bg-blue-900 transition duration-100">
-                <Home className="text-blue-700 active:text-white duration-100"/>
+                <HomeIcon className="text-blue-700 active:text-white duration-100"/>
             </Link>
 
             <img className="w-16 absolute left-5 top-5" src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"/>
@@ -138,7 +185,7 @@ export const Home = () => {
 
             <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
                 <div className="h-[30%] bg-white p-6 relative">
-                    {panelOpen && <ChevronDown ref={panelCloseRef} onClick={() => {setpanelOpen(false)}} className="absolute right-5 top-6 cursor-pointer text-xl opacity-0"/>}
+                    {panelOpen && <ChevronDown ref={panelCloseRef} onClick={handlePanelClose} className={`absolute right-5 top-6 cursor-pointer text-xl transition-opacity duration-200 ${panelOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}/>}
                     <h4 className="text-2xl font-semibold">Find a trip</h4>
                     <form
                         onSubmit={(e) => {
@@ -148,34 +195,46 @@ export const Home = () => {
                         <div className="absolute h-14 w-1 bg-gray-400 top-[50%] left-8 rounded-full"></div>
                         <input
                             onClick={() => {
-                                setpanelOpen(true)
+                                setpanelOpen(true),
+                                setactiveField('pickup')
                             }}
                             className="bg-[#eee] px-12 py-2 text-base rounded-lg mt-5 w-full"
                             type="text"
                             placeholder="Add a pick-up location"
                             value={pick}
-                            onChange={(e) => {
-                                setpick(e.target.value)
-                            }}
+                            onChange={HandlePickupChange}
                         />
 
                         <input
                             onClick={() => {
-                                setpanelOpen(true)
+                                setpanelOpen(true),
+                                setactiveField('destination')
                             }}
                             className="bg-[#eee] px-12 py-2 text-base rounded-lg mt-3 w-full"
                             type="text"
                             placeholder="Enter your destination"
                             value={destination}
-                            onChange={(e) => {
-                                setdestination(e.target.value)
-                            }}
+                            onChange={HandleDestinationChange}
                         />
                     </form>
+
+                    {panelOpen && (
+                        <button
+                            onClick={FindTrip}
+                            className="flex items-center justify-center w-full bg-[#10b461] text-white font-semibold py-3 rounded-xl mt-5"
+                        >
+                            Find Trip
+                        </button>
+                    )}
                 </div>
 
                 <div ref={panelRef} className="bg-white h-0 opacity-0">
-                    <LocationSearchPanel setpanelOpen={setpanelOpen} setvehiclePanelOpen={setvehiclePanelOpen} setconfirmRidePanel={setconfirmRidePanel}/>
+                    <LocationSearchPanel 
+                        suggestions={activeField === 'pickup' ? pickupSuggestions : destinationSuggestions}
+                        setpick={setpick}
+                        setdestination={setdestination}
+                        activeField={activeField}
+                    />
                 </div>
             </div>
 

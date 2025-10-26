@@ -1,30 +1,46 @@
 import { MapPin } from "lucide-react";
 
+// ...existing code...
 export const LocationSearchPanel = (props) => {
-  const locations = [
-    "24B , Near Kapoor's cafe, Sheryians Coding School, Bhopal",
-    "23B , Near Kapoor's cafe, Sheryians Coding School, Bhopal",
-    "22B , Near Kapoor's cafe, Sheryians Coding School, Bhopal",
-    "21B , Near Kapoor's cafe, Sheryians Coding School, Bhopal",
-  ];
+  const suggestions = Array.isArray(props.suggestions) ? props.suggestions : [];
+
+  const handleSelect = (item) => {
+    const label = typeof item === 'string' ? item : item?.name;
+
+    if (!label) return;
+
+    if (props.activeField === "pickup") {
+      props.setpick?.(label);
+    } else if (props.activeField === "destination") {
+      props.setdestination?.(label);
+    }
+
+    props.setpanelOpen?.(false);
+    if (props.activeField === "destination") {
+      props.setvehiclePanelOpen?.(true);
+    }
+  };
 
   return (
     <div>
-      {locations.map((element , index) => (
-        <div
-          key={index}
-          onClick={() => {
-            props.setvehiclePanelOpen(true)
-            props.setpanelOpen(false)
-          }}
-          className="flex items-center justify-start gap-x-2 my-4 border-2 active:border-gray-400 px-4 py-2 rounded-lg border-gray-50"
-        >
-          <h2 className="bg-[#eee] h-8 w-16 rounded-full flex items-center justify-center">
-            <MapPin />
-          </h2>
-          <h4 className="text-base font-medium">{element}</h4>
-        </div>
-      ))}
+      {suggestions.length === 0 ? (
+        ''
+      ) : (
+        suggestions.map((element, index) => (
+          <button
+            key={element?.place_id ?? index}
+            onClick={() => handleSelect(element)}
+            className="flex w-full items-center justify-start gap-x-2 my-4 border-2 active:border-gray-400 px-4 py-2 rounded-lg border-gray-50 text-left"
+          >
+            <span className="bg-[#eee] h-8 w-16 rounded-full flex items-center justify-center">
+              <MapPin />
+            </span>
+            <span className="text-base font-medium">
+              {typeof element === "string" ? element : element?.name ?? "Unknown location"}
+            </span>
+          </button>
+        ))
+      )}
     </div>
   );
 };
