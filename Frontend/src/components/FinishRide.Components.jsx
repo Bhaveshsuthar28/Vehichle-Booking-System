@@ -5,7 +5,7 @@ export const FinishRide = ({setfinishRidingPanel}) => {
     return(
         <div className="relative w-full">
             <h3 onClick={() => {setfinishRidingPanel(false)}} className="text-center text-2xl font-bold text-black mb-4 relative">
-                Confirm this ride to Start!
+                Finish this Ride 
             </h3>
         
             <div className="flex flex-col gap-6 items-center w-full p-4">

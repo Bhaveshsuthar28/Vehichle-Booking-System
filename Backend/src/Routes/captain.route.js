@@ -25,4 +25,3 @@ CaptainRouter.get('/profile' , authCapatain , GetCaptainProfile);
 CaptainRouter.get('/logout' , authCapatain , Captainlogout);
 
 export {CaptainRouter}
-

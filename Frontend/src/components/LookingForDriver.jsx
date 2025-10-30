@@ -1,6 +1,17 @@
 import { ChevronDown  ,LocateFixed,Pin, Wallet} from "lucide-react"
 
-export const LookingRide = ({setlookingPanelOpen}) => {
+export const LookingRide = ({setlookingPanelOpen , pick , destination , Fare , vehicleType ,}) => {
+
+    const splitAddress = (address) => {
+        const parts = (address ?? '').split(',').map((part) => part.trim()).filter(Boolean);
+        const heading = parts.shift() ?? '';
+        const details = parts.length ? parts.join(', ') : '';
+        return { heading, details };
+    }
+
+    const pickupParts = splitAddress(pick);
+    const destinationParts = splitAddress(destination);
+
     return(
         <div className="">
             
@@ -20,22 +31,25 @@ export const LookingRide = ({setlookingPanelOpen}) => {
                     <div className="flex items-center gap-3">
                         <Pin className="h-6 w-6"/>
                         <div className="flex flex-col m-2">
-                            <h3 className="text-lg font-semibold">562/11-A</h3>
-                            <p className="text-sm text-gray-600">Kaikondrahalli, Bengaluru, Karnataka</p>
+                            <h3 className="text-lg font-semibold">{pickupParts.heading || 'Pickup'}</h3>
+                            {!!pickupParts.details && (
+                                <p className="text-sm text-gray-600">{pickupParts.details}</p>
+                            )}
                         </div>
                     </div>
                     <div className="flex items-center gap-3 border-t-2">
                         <LocateFixed className="h-6 w-6"/>
                         <div className="flex flex-col m-2">
-                            <h3 className="text-lg font-semibold">Third Wave Coffee</h3>
-                            <p className="text-sm text-gray-600">17th Cross Rd, PWD Quarters, 1st Sector,</p>
-                            <p className="text-sm text-gray-600">HSR Layout, Bengaluru, Karnataka</p>
+                            <h3 className="text-lg font-semibold">{destinationParts.heading || 'Destination'}</h3>
+                            {!!destinationParts.details && (
+                                <p className="text-sm text-gray-600">{destinationParts.details}</p>
+                            )}
                         </div>
                     </div>
                     <div className="flex items-center gap-3 border-t-2 mb-5">
                         <Wallet className="h-6 w-6"/>
                         <div className="flex flex-col m-2">
-                            <h3 className="text-lg font-semibold">$19</h3>
+                            <h3 className="text-lg font-semibold">₹{Fare[vehicleType]}</h3>
                             <p className="text-sm text-gray-600">Cash</p>
                         </div>
                     </div>

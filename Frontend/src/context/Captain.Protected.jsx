@@ -2,7 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 
 export const CaptainProtectedWrapper = ({children}) => {
 
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('captainToken')
     const location = useLocation();
 
     if(!token){

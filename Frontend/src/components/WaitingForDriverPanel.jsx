@@ -1,6 +1,18 @@
 import { ChevronDown  ,LocateFixed,Pin, Star, Wallet} from "lucide-react"
 
-export const WaitingForDRiver = ({setwaitingDriverPanel}) => {
+export const WaitingForDriver = ({setwaitingDriverPanel , rideInfo}) => {
+
+    const splitAddress = (address) => {
+        const parts = (address ?? '').split(',').map((part) => part.trim()).filter(Boolean);
+        const heading = parts.shift() ?? '';
+        const details = parts.length ? parts.join(', ') : '';
+        return { heading, details };
+    }
+
+    const pickupLocation = splitAddress(rideInfo?.pickup);
+    const destinationLocation = splitAddress(rideInfo?.destination);
+
+
     return(
         <div className="">
             
@@ -13,9 +25,9 @@ export const WaitingForDRiver = ({setwaitingDriverPanel}) => {
             <div className="flex items-center justify-between">
                 <img  className="h-12" alt="car" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=956/height=538/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy83NjRlZGFmYS00NzJiLTRmZTYtYmY4YS03NGE4OTRhZDNkZWEucG5n"/>
                 <div className="text-right">
-                    <h2 className="text-lg font-medium ">Bhavesh</h2>
-                    <h4 className="text-2xl font-semibold pb-1">RJ04 AB 1234</h4>
-                    <p className="text-sm text-gray-600">White Suzuki S-Presso LXI</p>
+                    <h2 className="text-lg font-medium ">{rideInfo?.captain.fullname.firstname + " " + rideInfo?.captain.fullname.lastname}</h2>
+                    <h4 className="text-2xl font-semibold pb-1">{rideInfo?.captain?.vehicle?.plate}</h4>
+                    <p className="text-sm text-gray-600">Colour : {rideInfo?.captain.vehicle?.color}</p>
                     <p className="flex gap-x-2 font-meduim"><Star/>4.9</p>
                 </div>
             </div>
@@ -25,22 +37,25 @@ export const WaitingForDRiver = ({setwaitingDriverPanel}) => {
                     <div className="flex items-center gap-3">
                         <Pin className="h-6 w-6"/>
                         <div className="flex flex-col m-2">
-                            <h3 className="text-lg font-semibold">562/11-A</h3>
-                            <p className="text-sm text-gray-600">Kaikondrahalli, Bengaluru, Karnataka</p>
+                            <h3 className="text-lg font-semibold">{pickupLocation.heading || 'Pickup'}</h3>
+                            {!!pickupLocation.details && (
+                                <p className="text-sm text-gray-600">{pickupLocation.details}</p>
+                            )}
                         </div>
                     </div>
                     <div className="flex items-center gap-3 border-t-2">
                         <LocateFixed className="h-6 w-6"/>
                         <div className="flex flex-col m-2">
-                            <h3 className="text-lg font-semibold">Third Wave Coffee</h3>
-                            <p className="text-sm text-gray-600">17th Cross Rd, PWD Quarters, 1st Sector,</p>
-                            <p className="text-sm text-gray-600">HSR Layout, Bengaluru, Karnataka</p>
+                        <h3 className="text-lg font-semibold">{destinationLocation.heading || 'Pickup'}</h3>
+                            {!!destinationLocation.details && (
+                                <p className="text-sm text-gray-600">{destinationLocation.details}</p>
+                            )}
                         </div>
                     </div>
                     <div className="flex items-center gap-3 border-t-2 mb-5">
                         <Wallet className="h-6 w-6"/>
                         <div className="flex flex-col m-2">
-                            <h3 className="text-lg font-semibold">$19</h3>
+                            <h3 className="text-lg font-semibold">₹{rideInfo?.fare}</h3>
                             <p className="text-sm text-gray-600">Cash</p>
                         </div>
                     </div>

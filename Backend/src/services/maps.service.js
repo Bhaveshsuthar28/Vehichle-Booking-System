@@ -1,4 +1,5 @@
 import axios from "axios"
+import { CaptainModel } from "../Models/captain.model.js";
 
 export const GetLocationCoordinate = async(address) => {
     const Apikey = process.env.GEOAPIFY_API_KEY;
@@ -80,6 +81,24 @@ export const GetLocationSuggestions = async(input) => {
         else{
             throw new Error('Unable to fetch suggestions')
         }
+    } catch (error) {
+        console.error(error.message);
+        throw error;
+    }
+}
+
+export const GetCaptainInRadiuis = async(lat , lng , radiusKm) => {
+    try {
+        const captains = await CaptainModel.find({
+            location: {
+                $near: {
+                    $geometry: { type: 'Point', coordinates: [lng, lat] },
+                    $maxDistance: radiusKm * 1000
+                }
+            },
+            socketId: { $exists: true, $ne: null }
+        });
+        return captains;
     } catch (error) {
         console.error(error.message);
         throw error;

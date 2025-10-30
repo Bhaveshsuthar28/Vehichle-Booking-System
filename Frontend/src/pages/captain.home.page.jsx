@@ -2,19 +2,92 @@ import { LogOut} from "lucide-react"
 import { Link } from "react-router-dom"
 import { CaptainInfo } from "../components/Captain.Info.jsx"
 import { RidePopUp } from "../components/RidePopUp.jsx"
-import { useRef, useState } from "react"
+import { useRef, useState , useEffect , useContext} from "react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 import { ConfirmRidePopup } from "../components/ConfirmridePopup.jsx"
+import { SocketContext } from "../context/SocketDataContext.js";
+import {CaptainDataContext} from "../context/UserDataContext.jsx"
+import axios from 'axios'
 
 export const CapatainHome = () => {
     const [ridePopupPanel , setridePopupPanel] = useState(false);
     const [ConfirmridePopupPanel , setConfirmridePopupPanel] = useState(false);
+    const [ride , setride] = useState(null);
+
+    const {socket} = useContext(SocketContext);
+    const {captain} = useContext(CaptainDataContext)
+
+    useEffect(() => {   
+        if (!captain || !socket) return;
+        console.log(captain);
+
+        socket.emit("join" , {
+            userType : "Captain",
+            userId : captain._id
+        })
+
+        const handleJoinSuccess = (data) => {
+            console.log('Successfully joined with socket:', data.socketId);
+        };
+
+        const handleNewRide =(payload) => {
+            console.log('Received new ride:', payload);
+            setride(payload);
+            setridePopupPanel(true)
+        }
+
+        socket.on('join-success' , handleJoinSuccess)
+        socket.on('new-ride'  , handleNewRide)
+
+        const updateLocation = ()  => {
+            if(navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((position) =>{
+
+                    console.log("updating location..." , position.coords.latitude , position.coords.longitude);
+
+                    socket.emit('update-location-captain' , {
+                        userId : captain._id,
+                        location : {
+                            lat : position.coords.latitude,
+                            lng : position.coords.longitude
+                        }
+                    })
+                })
+            }
+        }
+
+        const LocationInterval = setInterval(updateLocation , 10000);
+        updateLocation();
+
+        return () => {
+            socket.off("join-success", handleJoinSuccess);
+            socket.off("new-ride" , handleNewRide);
+            clearInterval(LocationInterval);
+        }
+
+    } , [captain , socket])
+
+    const confirmRide = async() => {
+        const captainToken = localStorage.getItem('captainToken');
+        if(!captainToken || !ride?._id) return;
+
+        await axios.post(`${import.meta.env.VITE_BASE_URL}/api/rides/confirm` ,
+            { rideId: ride._id },
+            {
+                headers: {
+                    Authorization: `Bearer ${captainToken}`,
+                },
+            },
+        )
+
+        setridePopupPanel(false);
+        setConfirmridePopupPanel(true);
+    }
 
     const ridepopUpRef = useRef(null);
     const ConfirmRideRef = useRef(null);
 
-    
     
     useGSAP(() => {
         if(!ridepopUpRef.current) return;
@@ -50,15 +123,24 @@ export const CapatainHome = () => {
             </div>
 
             <div className="h-[40%] p-6">
-                <CaptainInfo setridePopupPanel={setridePopupPanel}/>
+                <CaptainInfo/>
             </div>
 
             <div ref={ridepopUpRef} className="fixed bottom-0 z-10 w-full bg-white px-3 py-6 pt-12">
-                <RidePopUp setridePopupPanel={setridePopupPanel} setConfirmridePopupPanel={setConfirmridePopupPanel}/>
+                <RidePopUp 
+                    setridePopupPanel={setridePopupPanel} 
+                    setConfirmridePopupPanel={setConfirmridePopupPanel}
+                    ride={ride}
+                    confirmRide={confirmRide}
+                />
             </div>
 
             <div ref={ConfirmRideRef} className="fixed bottom-0 h-screen z-10 w-full bg-white px-3 py-6 pt-12">
-                <ConfirmRidePopup setConfirmridePopupPanel={setConfirmridePopupPanel} setridePopupPanel={setridePopupPanel}/>
+                <ConfirmRidePopup 
+                    setConfirmridePopupPanel={setConfirmridePopupPanel} 
+                    setridePopupPanel={setridePopupPanel}
+                    ride={ride}
+                />
             </div>
         </div>
     )

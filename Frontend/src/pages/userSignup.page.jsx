@@ -35,7 +35,7 @@ export const UserSignUp = () => {
                 const data = response.data;
                 
                 setuser(data.user)
-                localStorage.setItem('token', data.token) 
+                localStorage.setItem('userToken', data.token) 
                 navigate('/home')
             }
 

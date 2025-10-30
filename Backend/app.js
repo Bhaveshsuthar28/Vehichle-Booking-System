@@ -22,6 +22,7 @@ app.use(express.urlencoded({
 app.use(cookieParser())
 app.use(express.static('public'))
 
+
 app.use('/api/users' , UserRouter);
 app.use('/api/captains',CaptainRouter)
 app.use('/api/maps', MapRouter)

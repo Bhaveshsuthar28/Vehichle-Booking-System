@@ -2,7 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 
 export const UserProtectedWrapper = ({children}) => {
 
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('userToken')
     const location = useLocation();
 
     if(!token){

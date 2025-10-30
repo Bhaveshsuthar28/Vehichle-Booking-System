@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { UserInfoForDriver } from "./UserInfoForDriver";
 import { useState } from "react";
 
-export const ConfirmRidePopup = ({setridePopupPanel , setConfirmridePopupPanel}) => {
+export const ConfirmRidePopup = ({setridePopupPanel , setConfirmridePopupPanel , ride}) => {
 
     const [otp , setotp] = useState("");
 
@@ -13,11 +13,11 @@ export const ConfirmRidePopup = ({setridePopupPanel , setConfirmridePopupPanel})
     return(
         <div className="relative w-full">
             <h3 onClick={() => {setridePopupPanel(true)}} className="text-center text-2xl font-bold text-black mb-4 relative">
-                Finish this Ride
+                Confirm this ride to Start!
             </h3>
         
             <div className="flex flex-col gap-6 items-center w-full p-4">
-                <UserInfoForDriver />
+                <UserInfoForDriver ride={ride}/>
 
                 <div className="w-full">
                     <form className="w-full flex flex-col items-center gap-5">

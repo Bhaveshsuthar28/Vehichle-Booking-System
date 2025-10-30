@@ -23,7 +23,7 @@ export const CaptainLogin = () => {
         if(response.status === 201){
             const data = response.data;
             setCaptain(data.captain);
-            localStorage.setItem('token', data.token)
+            localStorage.setItem('captainToken', data.token)
             navigate('/captain-home')
         }
         setemail('');

@@ -60,11 +60,15 @@ const CaptainSchema = new mongoose.Schema({
     },
 
     location : {
-        lat : {
-            type : Number
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
         },
-        lng : {
-            type : Number
+        coordinates: {
+            type: [Number],
+            index: '2dsphere',
+            default: [0, 0]
         }
     }  
 })
@@ -81,5 +85,7 @@ CaptainSchema.methods.camparePassword = async function (password) {
 CaptainSchema.statics.hashpassword = async function (password){
     return await bcrypt.hash(password , 10);
 }
+
+CaptainSchema.index({ location: '2dsphere' });
 
 export const CaptainModel = mongoose.model('Captain',CaptainSchema)
