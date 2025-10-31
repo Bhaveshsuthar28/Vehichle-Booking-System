@@ -311,13 +311,6 @@ export const Home = () => {
  
     return(
         <div className="h-screen relative overflow-hidden">
-            <button className="fixed h-10 w-10 flex items-center justify-center rounded-full top-2 left-2 
-                bg-white/10 backdrop-blur-md border border-blue-900 shadow-lg active:bg-blue-900 transition duration-100">
-                <HomeIcon className="text-blue-700 active:text-white duration-100"/>
-            </button>
-
-            
-
             <div className="h-screen w-screen z-0 absolute top-0 left-0">
                 <LiveTracking
                     pickupAddress={rideInfo ? rideInfo.pickup : null}
@@ -331,7 +324,7 @@ export const Home = () => {
             <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
                 <div className="h-[30%] bg-white p-6 relative flex flex-col justify-center items-center gap-y-4">
                     {panelOpen && <ChevronDown ref={panelCloseRef} onClick={handlePanelClose} className={`absolute right-5 top-6 cursor-pointer text-xl transition-opacity duration-200 ${panelOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}/>}
-                    <h4 className="text-2xl font-semibold">Find a trip</h4>
+                    <h4 className="text-2xl font-semibold mt-5">Find a trip</h4>
                     <form
                         onSubmit={(e) => {
                             handleSubmit(e)

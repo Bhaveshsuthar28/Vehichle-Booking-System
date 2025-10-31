@@ -1,6 +1,5 @@
 import {LocateFixed , MapPin } from "lucide-react";
 
-// ...existing code...
 export const LocationSearchPanel = (props) => {
   const suggestions = Array.isArray(props.suggestions) ? props.suggestions : [];
 
