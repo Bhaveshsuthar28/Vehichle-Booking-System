@@ -23,7 +23,7 @@ export const LookingRide = ({setlookingPanelOpen , pick , destination , Fare , v
             <div className="relative w-full h-1 bg-green-200 rounded overflow-hidden mb-5">
                 <div className="absolute top-0 left-0 h-full w-1/3 bg-green-600 transform -translate-x-full animate-slide"></div>
             </div>
-            <h3 className="text-2xl font-semibold mb-5">Looking for a Driver</h3>
+            <h3 className="text-2xl font-semibold mb-5 text-center">Looking for a Driver</h3>
 
             <div className="flex gap-2 justify-between flex-col items-center">
                 <img  className="h-16" alt="car" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=956/height=538/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy83NjRlZGFmYS00NzJiLTRmZTYtYmY4YS03NGE4OTRhZDNkZWEucG5n"/>

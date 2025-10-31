@@ -1,5 +1,5 @@
 import { validationResult } from "express-validator"
-import { CreateRide, GetFare  , confirmRideService} from "../services/ride.service.js";
+import { CreateRide, GetFare  , confirmRideService , StartRideService , endRideService} from "../services/ride.service.js";
 import { GetCaptainInRadiuis  , GetLocationCoordinate} from "../services/maps.service.js";
 import { sendMessageToSocketId , isSocketConnected, getOnlineCaptainIds} from "../../socket.js"; 
 import { RideModel } from "../Models/Ride.model.js";
@@ -55,7 +55,7 @@ export const createRide = async(req , res , next) => {
                     data: RideWithUser
                 });
             } else {
-                console.log(`⚠️ Captain ${captain._id} socket ${captain.socketId} not connected`);
+                console.log(`Captain ${captain._id} socket ${captain.socketId} not connected`);
             }
         });
     } catch (error) {
@@ -100,5 +100,54 @@ export const confirmRide = async(req , res) => {
     }
     catch(error){
         return res.status(500).json({message : error.message})
+    }
+}
+
+export const StartRide = async(req , res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(401).json({errors : errors.array()})
+    }
+
+    const {rideId , otp} = req.query;
+
+    try{
+        const ride = await StartRideService({
+            rideId , 
+            otp , 
+            captain : req.captain
+        })
+
+        sendMessageToSocketId(ride.user.socketId , {
+            event : 'ride-started',
+            data : ride
+        })
+
+        return res.status(200).json(ride)
+
+    } catch(error){
+        return res.status(500).json({message : error.message})
+    }
+} 
+
+export const EndRide = async(req , res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(401).json({errors : errors.array()})
+    }
+
+    const {rideId} = req.query;
+
+    try{
+        const ride = await endRideService({rideId , captain : req.captain});
+
+        sendMessageToSocketId(ride.user.socketId , {
+            event : 'ride-ended',
+            data : ride
+        });
+
+        return res.status(200).json(ride)
+    } catch(error){
+        return res.status(404).json({message : error.message})
     }
 }

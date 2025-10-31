@@ -1,4 +1,4 @@
-import { MapPin } from "lucide-react";
+import {LocateFixed , MapPin } from "lucide-react";
 
 // ...existing code...
 export const LocationSearchPanel = (props) => {
@@ -22,10 +22,8 @@ export const LocationSearchPanel = (props) => {
   };
 
   return (
-    <div>
-      {suggestions.length === 0 ? (
-        ''
-      ) : (
+    <div className="space-y-3">
+      {suggestions.length > 0 &&
         suggestions.map((element, index) => (
           <button
             key={element?.place_id ?? index}
@@ -39,8 +37,7 @@ export const LocationSearchPanel = (props) => {
               {typeof element === "string" ? element : element?.name ?? "Unknown location"}
             </span>
           </button>
-        ))
-      )}
+        ))}
     </div>
   );
 };

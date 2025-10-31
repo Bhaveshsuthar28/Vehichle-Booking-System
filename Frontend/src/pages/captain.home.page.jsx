@@ -9,14 +9,18 @@ import { ConfirmRidePopup } from "../components/ConfirmridePopup.jsx"
 import { SocketContext } from "../context/SocketDataContext.js";
 import {CaptainDataContext} from "../context/UserDataContext.jsx"
 import axios from 'axios'
+import { LiveTracking } from "../components/LiveTracking.jsx"
+import {useDeviceLocation} from "../components/useDeviceLocation.jsx"
 
 export const CapatainHome = () => {
     const [ridePopupPanel , setridePopupPanel] = useState(false);
     const [ConfirmridePopupPanel , setConfirmridePopupPanel] = useState(false);
     const [ride , setride] = useState(null);
+    const [userLiveLocation, setUserLiveLocation] = useState(null);
 
     const {socket} = useContext(SocketContext);
     const {captain} = useContext(CaptainDataContext)
+    const { coords: captainCoords } = useDeviceLocation({ enableHighAccuracy: true });
 
     useEffect(() => {   
         if (!captain || !socket) return;
@@ -37,8 +41,13 @@ export const CapatainHome = () => {
             setridePopupPanel(true)
         }
 
+        const handleUserLocation = ({ location }) => {
+            setUserLiveLocation(location);
+        };
+
         socket.on('join-success' , handleJoinSuccess)
         socket.on('new-ride'  , handleNewRide)
+        socket.on('user-location', handleUserLocation)
 
         const updateLocation = ()  => {
             if(navigator.geolocation){
@@ -63,10 +72,19 @@ export const CapatainHome = () => {
         return () => {
             socket.off("join-success", handleJoinSuccess);
             socket.off("new-ride" , handleNewRide);
+            socket.off("user-location", handleUserLocation);
             clearInterval(LocationInterval);
         }
 
     } , [captain , socket])
+
+    useEffect(() => {
+        if (!socket || !captain?._id || !captainCoords) return;
+        socket.emit("update-location-captain", {
+            userId: captain._id,
+            location: { lat: captainCoords.lat, lng: captainCoords.lng },
+        });
+    }, [socket, captain, captainCoords]);
 
     const confirmRide = async() => {
         const captainToken = localStorage.getItem('captainToken');
@@ -119,7 +137,12 @@ export const CapatainHome = () => {
                 </Link>
             </div>
             <div className="h-[60%]">
-                <img className="h-full w-full object-cover" src="https://images.prismic.io/superpupertest/75d32275-bd15-4567-a75f-76c4110c6105_1*mleHgMCGD-A1XXa2XvkiWg.png?auto=compress,format&w=1966&h=1068"/>
+                <LiveTracking
+                    pickupAddress={ride ? ride.pickup : null}
+                    destinationAddress={ride ? ride.destination : null}
+                    userLocation={ride ? userLiveLocation : null}
+                    captainLocation={captainCoords ? { lat: captainCoords.lat, lng: captainCoords.lng } : null}
+                />
             </div>
 
             <div className="h-[40%] p-6">

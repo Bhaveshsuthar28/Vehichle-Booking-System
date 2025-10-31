@@ -33,7 +33,7 @@ export const UserInfoForDriver = ({ride}) => {
 
         
         <div className="text-right">
-            <h4 className="text-xl font-bold text-gray-900">-</h4>
+            <h4 className="text-xl font-bold text-gray-900">2.2 KM</h4>
         </div>
       </div>
 

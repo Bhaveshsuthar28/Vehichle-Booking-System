@@ -1,15 +1,46 @@
-import { Link } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import { UserInfoForDriver } from "./UserInfoForDriver";
 import { useState } from "react";
+import axios from 'axios'
 
 export const ConfirmRidePopup = ({setridePopupPanel , setConfirmridePopupPanel , ride}) => {
 
     const [otp , setotp] = useState("");
 
-    const SubmitHandler = (e) => {
-        e.preventDefault();
+    const navigate = useNavigate();
 
+    const SubmitHandler = async(e) => {
+        e.preventDefault();
+        if(!ride?._id || otp.length !== 4) return;
+
+        const captainToken = localStorage.getItem('captainToken'); 
+
+        try{
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/rides/start-ride` ,{
+                params: {
+                    rideId: ride._id, 
+                    otp 
+                },
+
+                headers: { 
+                    Authorization: `Bearer ${captainToken}` 
+                },
+            });
+
+            if(response.status === 200){
+                const ridePayload = response.data;
+                sessionStorage.setItem('captainActiveRide', JSON.stringify(ridePayload));
+                sessionStorage.setItem('userActiveRide', JSON.stringify(ridePayload));
+                setConfirmridePopupPanel(false);
+                setridePopupPanel(false);
+                navigate('/captain-riding' , {state : {ride : ridePayload}})
+            }
+        } catch(error){
+            console.error('Failed to start ride:', error?.response?.data || error.message);
+        }
     }
+
+    const isOtpValid = otp.length === 4;
     return(
         <div className="relative w-full">
             <h3 onClick={() => {setridePopupPanel(true)}} className="text-center text-2xl font-bold text-black mb-4 relative">
@@ -20,7 +51,9 @@ export const ConfirmRidePopup = ({setridePopupPanel , setConfirmridePopupPanel ,
                 <UserInfoForDriver ride={ride}/>
 
                 <div className="w-full">
-                    <form className="w-full flex flex-col items-center gap-5">
+                    <form 
+                        onSubmit={SubmitHandler}
+                        className="w-full flex flex-col items-center gap-5">
                         <input
                             type="text"
                             maxLength={4}
@@ -37,18 +70,15 @@ export const ConfirmRidePopup = ({setridePopupPanel , setConfirmridePopupPanel ,
                             onChange ={(e) => setotp(e.target.value)}
                         />
 
-                        <Link
-                            to="/captain-riding"
-                            onClick={() => {
-                                setConfirmridePopupPanel(true);
-                                setridePopupPanel(false);
-                            }}
-                            className="w-full bg-green-600 text-white text-lg font-semibold rounded-2xl py-3 
+                        <button
+                            type="submit"
+                            disabled={!isOtpValid}
+                            className={`w-full bg-green-600 text-white text-lg font-semibold rounded-2xl py-3 
                                         text-center shadow-md hover:shadow-lg active:scale-95 
-                                        active:bg-green-700 transition-all duration-150"
+                                        active:bg-green-700 transition-all duration-150 ${!isOtpValid ? 'opacity-60 cursor-not-allowed hover:shadow-none active:scale-100 active:bg-green-600' : ''}`}
                             >
                                 Accept
-                        </Link>
+                        </button>
 
                         <button
                             type="button"

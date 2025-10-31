@@ -1,6 +1,6 @@
 import express from 'express'
 import { body, query } from 'express-validator';
-import { createRide, GetFareController  , confirmRide} from '../Controllers/ride.controller.js';
+import { createRide, GetFareController  , confirmRide , StartRide , EndRide} from '../Controllers/ride.controller.js';
 import { authUser  , authCapatain} from '../middlewares/auth.middleware.js';
 
 export const RideRouter = express.Router();
@@ -23,3 +23,13 @@ RideRouter.post('/confirm' ,authCapatain ,
    confirmRide
 )
 
+RideRouter.get('/start-ride' , authCapatain , 
+   query('rideId').isMongoId().withMessage('Invalid ride id'),
+   query('otp').isString().isLength({min : 4 , max : 4}).withMessage('Invalid otp'),
+   StartRide
+)
+
+RideRouter.post('/end-ride' , authCapatain , 
+   query('rideId').isMongoId().withMessage('Invalid ride id'),
+   EndRide
+)

@@ -1,16 +1,18 @@
-import {useRef, useState , useEffect , useContext} from "react";
+import {useRef, useState , useEffect , useContext , useCallback} from "react";
 import {useGSAP} from "@gsap/react"
 import gsap from "gsap";
-import { ChevronDown , Home as HomeIcon} from 'lucide-react';
+import { ChevronDown , Home as HomeIcon , LocateFixed} from 'lucide-react';
 import { LocationSearchPanel } from "../components/LocationPanel.components.jsx";
 import {VehiclePanel} from '../components/Vehicle.price.components.jsx'
 import { ConfirmedVehicle } from "../components/Confirmed.vehicle.jsx";
 import { LookingRide } from "../components/LookingForDriver.jsx";
 import { WaitingForDriver } from "../components/WaitingForDriverPanel.jsx";
-import { Link } from "react-router-dom";
+import { Link , useNavigate} from "react-router-dom";
 import axios from 'axios'
 import { SocketContext } from "../context/SocketDataContext.js";
 import { UserDataContext } from "../context/UserDataContext.jsx";
+import { LiveTracking } from "../components/LiveTracking.jsx";
+import {useDeviceLocation} from "../components/useDeviceLocation.jsx";
 
 export const Home = () => {
 
@@ -33,10 +35,43 @@ export const Home = () => {
     const [Fare , setFare] = useState({});
     const [vehicleType , setvehicleType] = useState(null);
     const [rideInfo , setrideInfo] = useState(null);
+    const [captainLiveLocation, setCaptainLiveLocation] = useState(null);
+    const [isResolvingPickupFromDevice, setIsResolvingPickupFromDevice] = useState(false);
     const isFindTripEnabled = pick.trim().length > 0 && destination.trim().length > 0;
     const {socket} = useContext(SocketContext)
     const {user} = useContext(UserDataContext);
+    const navigate = useNavigate();
+    const USER_ACTIVE_RIDE_KEY = 'userActiveRide';
+    const { coords: userCoords } = useDeviceLocation({ enableHighAccuracy: true });
+    const userMapLocation = userCoords ? { lat: userCoords.lat, lng: userCoords.lng } : null;
+    const GEOAPIFY_API_KEY = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
+
+    const fillPickupWithCurrentLocation = useCallback(async() => {
+        if (!navigator.geolocation || !GEOAPIFY_API_KEY) return;
+
+        setIsResolvingPickupFromDevice(true);
+
+        try{
+            const response = await fetch(
+                `https://api.geoapify.com/v1/geocode/reverse?lat=${userCoords.lat}&lon=${userCoords.lng}&limit=1&apiKey=${GEOAPIFY_API_KEY}`
+            );
+            if (!response.ok) throw new Error("Reverse geocode failed");
+            const data = await response.json();
+            const formatted = data.features?.[0]?.properties?.formatted;
+
+            if (formatted) {
+                setpick(formatted);
+                setactiveField(null);
+                setpickupSuggestions([]);
+                setdestinationSuggestions([]);
+            }
+        } catch(error){
+            console.error("Reverse geocode error:", error.message);
+        } finally{
+            setIsResolvingPickupFromDevice(false);
+        }
+    } , [userCoords, GEOAPIFY_API_KEY]);
     useEffect(()=> {
         if(!user) return;
         
@@ -44,13 +79,50 @@ export const Home = () => {
 
         socket.emit("join" , {userType : "user" , userId : user._id})
 
-    } , [user , socket])
+    } , [user , socket]);
 
-    socket.on('ride-confirmed' , (data) => {
-        console.log('Ride confirmed' , data)
-        setwaitingDriverPanel(true)
-        setrideInfo(data)
-    })
+    useEffect(() => {
+
+        if(!socket) return;
+
+        const handleRideConfirmed = (data) => {
+            console.log('Ride confirmed' , data);
+            setwaitingDriverPanel(true);
+            setrideInfo(data);
+            sessionStorage.setItem(USER_ACTIVE_RIDE_KEY, JSON.stringify(data));
+        };
+
+        const handleRideStarted = (data) => {
+            setwaitingDriverPanel(false);
+            
+            if(data){
+                setrideInfo(data);
+                sessionStorage.setItem(USER_ACTIVE_RIDE_KEY , JSON.stringify(data));
+                navigate('/riding', { state: { ride: data } });
+            }else{
+                const persisted = sessionStorage.getItem(USER_ACTIVE_RIDE_KEY);
+                if(persisted){
+                    navigate('/riding' , {state : {ride : JSON.parse(persisted)}})
+                }
+            }
+        };
+
+        const handleCaptainLocation = ({ location }) => {
+            setCaptainLiveLocation(location);
+        };
+
+        socket.on('ride-confirmed' , handleRideConfirmed)
+
+        socket.on('ride-started' , handleRideStarted);
+
+        socket.on('captain-location', handleCaptainLocation)
+
+        return () => {
+            socket.off('ride-confirmed', handleRideConfirmed);
+            socket.off('ride-started', handleRideStarted);
+            socket.off('captain-location', handleCaptainLocation);
+        };
+    } , [socket , navigate])
 
     const HandlePickupChange = async(e) => {
         setpick(e.target.value);
@@ -69,6 +141,15 @@ export const Home = () => {
             console.log(error.message)
         } 
     }
+
+    useEffect(() => {
+        if (!socket || !user?._id || !userCoords) return;
+
+        socket.emit("update-location-user", {
+            userId: user._id,
+            location: { lat: userCoords.lat, lng: userCoords.lng },
+        });
+    } , [socket, user, userCoords])
 
     const HandleDestinationChange = async(e) => {
         setdestination(e.target.value);
@@ -238,7 +319,13 @@ export const Home = () => {
             <img className="w-16 absolute left-5 top-5" src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"/>
 
             <div className="h-screen w-screen z-0 absolute top-0 left-0">
-                <img className="w-full h-full object-cover" src="https://images.prismic.io/superpupertest/75d32275-bd15-4567-a75f-76c4110c6105_1*mleHgMCGD-A1XXa2XvkiWg.png?auto=compress,format&w=1966&h=1068"/>
+                <LiveTracking
+                    pickupAddress={rideInfo ? rideInfo.pickup : null}
+                    destinationAddress={rideInfo ? rideInfo.destination : null}
+                    userLocation={userMapLocation}
+                    captainLocation={rideInfo ? captainLiveLocation : null}
+                    heightClass="h-full"
+                />
             </div>
 
             <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
@@ -262,6 +349,17 @@ export const Home = () => {
                             value={pick}
                             onChange={HandlePickupChange}
                         />
+
+                        {!pick && panelOpen && (
+                            <button
+                                type="button"
+                                onClick={fillPickupWithCurrentLocation}
+                                disabled={!userCoords || isResolvingPickupFromDevice}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg px-3 py-1 text-xs font-semibold text-black transition disabled:cursor-not-allowed disabled:opacity-50 bg-transparent"
+                            >
+                                {isResolvingPickupFromDevice ? <LocateFixed className="opacity-100"/> : <LocateFixed className="opacity-50"/>}
+                            </button>
+                        )}
 
                         <input
                             onClick={() => {
@@ -293,6 +391,9 @@ export const Home = () => {
                         setpick={setpick}
                         setdestination={setdestination}
                         activeField={activeField}
+                        showUseCurrent={Boolean(userCoords)}
+                        onUseCurrentLocation={fillPickupWithCurrentLocation}
+                        currentLocationLoading={isResolvingPickupFromDevice}
                     />
                 </div>
             </div>

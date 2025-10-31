@@ -19,7 +19,7 @@ export const ConfirmedVehicle = ({setvehiclePanelOpen , setlookingPanelOpen , Cr
             }}>
                 <ChevronDown className="bg-gray-200 rounded-full active:bg-green-400"/>
             </h5>
-            <h3 className="text-2xl font-semibold mb-5">Confirm your ride</h3>
+            <h3 className="text-2xl font-semibold mb-5 text-center">Confirm your ride</h3>
             
             <div className="flex gap-2 justify-between flex-col items-center">
                 <img  className="h-16" alt="car" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=956/height=538/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy83NjRlZGFmYS00NzJiLTRmZTYtYmY4YS03NGE4OTRhZDNkZWEucG5n"/>

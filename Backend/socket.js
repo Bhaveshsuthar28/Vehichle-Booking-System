@@ -1,10 +1,19 @@
 import { Server } from 'socket.io';
 import { userModel } from './src/Models/user.model.js';
 import { CaptainModel } from './src/Models/captain.model.js';
+import { RideModel } from './src/Models/Ride.model.js';
 
 let io;
 
 const onlineCaptainSockets = new Map();
+
+const isValidLocation = (location) => {
+    return (
+        location &&
+        typeof location.lat === 'number' &&
+        typeof location.lng === 'number'
+    );
+}
 
 export const initializeSocket = (server) => {
     io = new Server(server, {
@@ -46,7 +55,7 @@ export const initializeSocket = (server) => {
         socket.on('update-location-captain', async (data) => {
             const { userId, location } = data;
 
-            if (!location || typeof location.lat !== 'number' || typeof location.lng !== 'number') {
+            if (!userId || !isValidLocation(location)) {
                 return socket.emit('error', { message: 'Invalid location data' });
             }
 
@@ -58,8 +67,53 @@ export const initializeSocket = (server) => {
                     }
                 });
                 console.log(`Captain ${userId} location updated to [${location.lat}, ${location.lng}]`);
+
+
+                const activeRide = await RideModel.findOne({
+                    captain: userId,
+                    status: { $in: ['accepted', 'ongoing'] }
+                }).populate('user', 'socketId');
+
+                if (activeRide?.user?.socketId) {
+                    io.to(activeRide.user.socketId).emit('captain-location', {
+                        rideId: activeRide._id.toString(),
+                        location,
+                    });
+                }
             } catch (error) {
                 console.error('Error updating location:', error);
+                socket.emit('error', { message: 'Failed to update location' });
+            }
+        });
+
+        socket.on('update-location-user', async (data) => {
+            const { userId, location } = data;
+
+            if (!userId || !isValidLocation(location)) {
+                return socket.emit('error', { message: 'Invalid location data' });
+            }
+
+            try {
+                await userModel.findByIdAndUpdate(userId, {
+                    location: {
+                        type: 'Point',
+                        coordinates: [location.lng, location.lat],
+                    }
+                });
+
+                const activeRide = await RideModel.findOne({
+                    user: userId,
+                    status: { $in: ['accepted', 'ongoing'] }
+                }).populate('captain', 'socketId');
+
+                if (activeRide?.captain?.socketId) {
+                    io.to(activeRide.captain.socketId).emit('user-location', {
+                        rideId: activeRide._id.toString(),
+                        location,
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating user location:', error);
                 socket.emit('error', { message: 'Failed to update location' });
             }
         });

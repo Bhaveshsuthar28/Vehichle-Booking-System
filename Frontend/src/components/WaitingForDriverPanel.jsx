@@ -1,4 +1,4 @@
-import { ChevronDown  ,LocateFixed,Pin, Star, Wallet} from "lucide-react"
+import { ChevronDown  ,LocateFixed,Pin,Wallet} from "lucide-react"
 
 export const WaitingForDriver = ({setwaitingDriverPanel , rideInfo}) => {
 
@@ -12,10 +12,16 @@ export const WaitingForDriver = ({setwaitingDriverPanel , rideInfo}) => {
     const pickupLocation = splitAddress(rideInfo?.pickup);
     const destinationLocation = splitAddress(rideInfo?.destination);
 
+    const captain = rideInfo?.captain;
+    const captainName = captain?.fullname
+        ? `${captain.fullname.firstname ?? ''} ${captain.fullname.lastname ?? ''}`.trim()
+        : 'Driver';
+    const vehicle = captain?.vehicle;
+    const otp = rideInfo?.otp ?? '--';
+    const fare = rideInfo?.fare ?? '--';
 
     return(
         <div className="">
-            
             <h5 className="flex justify-center p-1 text-center w-[93%] absolute top-2" onClick={() => {
                 setwaitingDriverPanel(false)
             }}>
@@ -23,12 +29,12 @@ export const WaitingForDriver = ({setwaitingDriverPanel , rideInfo}) => {
             </h5>
 
             <div className="flex items-center justify-between">
-                <img  className="h-12" alt="car" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=956/height=538/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy83NjRlZGFmYS00NzJiLTRmZTYtYmY4YS03NGE4OTRhZDNkZWEucG5n"/>
+                <img  className="h-16" alt="car" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=956/height=538/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy83NjRlZGFmYS00NzJiLTRmZTYtYmY4YS03NGE4OTRhZDNkZWEucG5n"/>
                 <div className="text-right">
-                    <h2 className="text-lg font-medium ">{rideInfo?.captain.fullname.firstname + " " + rideInfo?.captain.fullname.lastname}</h2>
-                    <h4 className="text-2xl font-semibold pb-1">{rideInfo?.captain?.vehicle?.plate}</h4>
-                    <p className="text-sm text-gray-600">Colour : {rideInfo?.captain.vehicle?.color}</p>
-                    <p className="flex gap-x-2 font-meduim"><Star/>4.9</p>
+                    <h2 className="text-lg font-medium ">{captainName}</h2>
+                    <h4 className="text-2xl font-semibold pb-1">{vehicle?.plate ?? '--'}</h4>
+                    <p className="text-sm text-gray-600">Colour : {vehicle?.color ?? '--'}</p>
+                    <p className="font-meduim font-semibold text-lg">OTP : {otp}</p>
                 </div>
             </div>
 
@@ -55,7 +61,7 @@ export const WaitingForDriver = ({setwaitingDriverPanel , rideInfo}) => {
                     <div className="flex items-center gap-3 border-t-2 mb-5">
                         <Wallet className="h-6 w-6"/>
                         <div className="flex flex-col m-2">
-                            <h3 className="text-lg font-semibold">₹{rideInfo?.fare}</h3>
+                            <h3 className="text-lg font-semibold">₹{fare}</h3>
                             <p className="text-sm text-gray-600">Cash</p>
                         </div>
                     </div>
