@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useContext, useState } from "react";
 import axios from "axios"
 import { UserDataContext } from "../context/UserDataContext.jsx";
+import MainLogo from "../assests/Logo.png";
 
 export const UserSignUp = () => {
 
@@ -54,7 +55,7 @@ export const UserSignUp = () => {
         <>
             <div className="p-7 flex h-screen flex-col justify-between">
                 <div>
-                    <img className="w-16 mb-8" src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"/>
+                    <img className="w-16 mb-8" src={MainLogo}/>
                     <form
                         onSubmit={SubmitHandler}
                     >

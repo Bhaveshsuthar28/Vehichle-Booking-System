@@ -311,12 +311,12 @@ export const Home = () => {
  
     return(
         <div className="h-screen relative overflow-hidden">
-            <Link to="" className="fixed h-10 w-10 flex items-center justify-center rounded-full top-2 left-2 
+            <button className="fixed h-10 w-10 flex items-center justify-center rounded-full top-2 left-2 
                 bg-white/10 backdrop-blur-md border border-blue-900 shadow-lg active:bg-blue-900 transition duration-100">
                 <HomeIcon className="text-blue-700 active:text-white duration-100"/>
-            </Link>
+            </button>
 
-            <img className="w-16 absolute left-5 top-5" src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"/>
+            
 
             <div className="h-screen w-screen z-0 absolute top-0 left-0">
                 <LiveTracking
@@ -329,7 +329,7 @@ export const Home = () => {
             </div>
 
             <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
-                <div className="h-[30%] bg-white p-6 relative">
+                <div className="h-[30%] bg-white p-6 relative flex flex-col justify-center items-center gap-y-4">
                     {panelOpen && <ChevronDown ref={panelCloseRef} onClick={handlePanelClose} className={`absolute right-5 top-6 cursor-pointer text-xl transition-opacity duration-200 ${panelOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}/>}
                     <h4 className="text-2xl font-semibold">Find a trip</h4>
                     <form
@@ -337,13 +337,13 @@ export const Home = () => {
                             handleSubmit(e)
                         }}
                     >
-                        <div className="absolute h-14 w-1 bg-gray-400 top-[50%] left-8 rounded-full"></div>
+                        <div className={`absolute h-14 w-1 ${panelOpen ? 'top-[38%] left-10' : 'top-[52%] left-10'} bg-gray-600 rounded-full`}></div>
                         <input
                             onClick={() => {
                                 setpanelOpen(true),
                                 setactiveField('pickup')
                             }}
-                            className="bg-[#eee] px-12 py-2 text-base rounded-lg mt-5 w-full"
+                            className="bg-[#eee] pl-12 pr-2 py-2 text-base rounded-lg mt-5 mb-2 w-full"
                             type="text"
                             placeholder="Add a pick-up location"
                             value={pick}
@@ -355,7 +355,7 @@ export const Home = () => {
                                 type="button"
                                 onClick={fillPickupWithCurrentLocation}
                                 disabled={!userCoords || isResolvingPickupFromDevice}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg px-3 py-1 text-xs font-semibold text-black transition disabled:cursor-not-allowed disabled:opacity-50 bg-transparent"
+                                className="absolute right-6 top-[31%] rounded-lg px-3 py-1 text-xs font-semibold text-black transition disabled:cursor-not-allowed disabled:opacity-50 bg-transparent"
                             >
                                 {isResolvingPickupFromDevice ? <LocateFixed className="opacity-100"/> : <LocateFixed className="opacity-50"/>}
                             </button>
@@ -366,7 +366,7 @@ export const Home = () => {
                                 setpanelOpen(true),
                                 setactiveField('destination')
                             }}
-                            className="bg-[#eee] px-12 py-2 text-base rounded-lg mt-3 w-full"
+                            className="bg-[#eee] pl-12 pr-2 py-2 text-base rounded-lg mt-3 w-full"
                             type="text"
                             placeholder="Enter your destination"
                             value={destination}

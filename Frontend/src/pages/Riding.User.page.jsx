@@ -106,7 +106,7 @@ export const RidingLive = () => {
 
             <div className="h-[60%] p-4">
                 <div className="flex items-center justify-between">
-                    <img  className="h-12" alt="car" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=956/height=538/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy83NjRlZGFmYS00NzJiLTRmZTYtYmY4YS03NGE4OTRhZDNkZWEucG5n"/>
+                    <img  className="h-12" alt="car" src=""/>
                     <div className="text-right">
                         <h2 className="text-lg font-medium ">{captain ? `${captain.fullname.firstname} ${captain.fullname.lastname}`.trim() : 'Captain'}</h2>
                         <h4 className="text-2xl font-semibold pb-1">{vehicle?.plate ?? '--'}</h4>
