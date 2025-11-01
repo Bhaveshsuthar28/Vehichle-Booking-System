@@ -65,7 +65,7 @@ export const UserLogin = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-secondary"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-secondary -top-4"
                             >
                                 {showPassword ? <EyeOff /> : <Eye />}
                             </button>

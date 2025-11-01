@@ -122,7 +122,7 @@ export const CaptainSignUp = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute inset-y-0 right-0 flex items-center px-3 text-text-secondary"
+                                className="absolute inset-y-0 right-0 flex items-center px-3 text-text-secondary -top-4"
                             >
                                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                             </button>
