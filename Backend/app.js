@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import { UserRouter } from "./src/Routes/user.route.js";
-import { CaptainRouter } from "./src/Routes/captain.route.js";
-import { MapRouter } from "./src/Routes/maps.routes.js";
-import { RideRouter } from "./src/Routes/rides.routes.js";
+import { UserRouter } from "./src/modules/users/user.route.js";
+import { CaptainRouter } from "./src/modules/captains/captain.route.js";
+import { MapRouter } from "./src/modules/maps/maps.route.js";
+import { RideRouter } from "./src/modules/rides/ride.route.js";
 
 const app = express();
 

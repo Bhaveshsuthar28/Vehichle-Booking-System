@@ -1,7 +1,7 @@
-import { userModel } from "../Models/user.model.js";
-import {CreateUser} from "../services/user.service.js";
+import { userModel } from "../../../Models/user.model.js";
+import {CreateUser} from "./user.service.js";
 import { validationResult } from "express-validator";
-import {blackListToken} from "../Models/blackListToken.model.js"
+import {blackListToken} from "../../../Models/blackListToken.model.js"
 
 const UserRegister = async(req , res) => {
     try {
@@ -112,4 +112,4 @@ const updateUserProfile = async (req, res) => {
     }
 };
 
-export {UserRegister , UserLogin , getUserProfile , logout, uploadProfileImage};
+export {UserRegister , UserLogin , getUserProfile , logout, uploadProfileImage, updateUserProfile};

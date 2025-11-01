@@ -1,6 +1,6 @@
 import express from "express";
-import { authUser } from "../middlewares/auth.middleware.js";
-import { getAutoCompleteSuggestions, GetDistanceTime, MapController } from "../Controllers/Maps.controller.js";
+import { authUser } from "../../../middlewares/auth.middleware.js";
+import { getAutoCompleteSuggestions, GetDistanceTime, MapController } from "./maps.controller.js";
 import { query } from "express-validator";
 
 const MapRouter = express.Router();

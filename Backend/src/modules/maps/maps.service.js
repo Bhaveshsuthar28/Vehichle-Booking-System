@@ -1,5 +1,5 @@
 import axios from "axios"
-import { CaptainModel } from "../Models/captain.model.js";
+import { CaptainModel } from "../../../Models/captain.model.js";
 
 export const GetLocationCoordinate = async(address) => {
     const Apikey = process.env.GEOAPIFY_API_KEY;

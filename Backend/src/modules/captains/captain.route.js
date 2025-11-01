@@ -1,8 +1,8 @@
 import express from "express"
 import {body} from "express-validator"
-import { CaptainRegister , CaptainLogin, GetCaptainProfile, Captainlogout, updateCaptainProfile} from "../Controllers/captain.controller.js";
-import { authCapatain } from "../middlewares/auth.middleware.js";
-import upload from "../config/cloudinary.config.js";
+import { CaptainRegister , CaptainLogin, GetCaptainProfile, Captainlogout, updateCaptainProfile, uploadProfileImage} from "./captain.controller.js";
+import { authCapatain } from "../../../middlewares/auth.middleware.js";
+import upload from "../../../config/cloudinary.config.js";
 
 const CaptainRouter = express.Router();
 

@@ -1,7 +1,7 @@
 import express from 'express'
 import { body, query } from 'express-validator';
-import { createRide, GetFareController  , confirmRide , StartRide , EndRide} from '../Controllers/ride.controller.js';
-import { authUser  , authCapatain} from '../middlewares/auth.middleware.js';
+import { createRide, GetFareController  , confirmRide , StartRide , EndRide} from './ride.controller.js';
+import { authUser  , authCapatain} from "../../../middlewares/auth.middleware.js";
 
 export const RideRouter = express.Router();
 

@@ -1,4 +1,4 @@
-import { CaptainModel } from "../Models/captain.model.js";
+import { CaptainModel } from "../../../Models/captain.model.js";
 
 const createCaptain = async({
     firstname , lastname , email , password , color ,plate , capacity , vehicleType

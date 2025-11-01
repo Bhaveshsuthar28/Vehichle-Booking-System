@@ -1,9 +1,10 @@
 import { validationResult } from "express-validator"
-import { CreateRide, GetFare  , confirmRideService , StartRideService , endRideService} from "../services/ride.service.js";
-import { GetCaptainInRadiuis  , GetLocationCoordinate} from "../services/maps.service.js";
-import { sendMessageToSocketId , isSocketConnected, getOnlineCaptainIds} from "../../socket.js"; 
-import { RideModel } from "../Models/Ride.model.js";
-import {CaptainModel} from "../Models/captain.model.js"
+import { CreateRide, GetFare  , confirmRideService , StartRideService , endRideService} from "./ride.service.js";
+import { GetCaptainInRadiuis  , GetLocationCoordinate} from "../maps/maps.service.js";
+import { sendMessageToSocketId , isSocketConnected, getOnlineCaptainIds} from "../../../socket.js"; 
+import { RideModel } from "../../../Models/Ride.model.js";
+import {CaptainModel} from "../../../Models/captain.model.js"
+import { userModel } from "../../../Models/user.model.js";
 
 export const createRide = async(req , res , next) => {
 
@@ -140,6 +141,28 @@ export const EndRide = async(req , res) => {
 
     try{
         const ride = await endRideService({rideId , captain : req.captain});
+
+        const captain = await CaptainModel.findById(req.captain._id);
+        const user = await userModel.findById(ride.user);
+
+        if (captain) {
+            captain.stats.totalTrips += 1;
+            captain.stats.totalDistance += ride.distance || 0;
+            captain.stats.totalDuration += ride.durations || 0;
+
+            if (captain.stats.totalDuration > 0) {
+                const totalDurationInHours = captain.stats.totalDuration / 3600;
+                captain.stats.avgSpeed = captain.stats.totalDistance / totalDurationInHours;
+            }
+
+            captain.tripHistory.push(ride._id);
+            await captain.save();
+        }
+
+        if (user) {
+            user.tripHistory.push(ride._id);
+            await user.save();
+        }
 
         sendMessageToSocketId(ride.user.socketId , {
             event : 'ride-ended',

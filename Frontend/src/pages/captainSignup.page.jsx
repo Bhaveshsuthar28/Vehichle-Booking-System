@@ -3,23 +3,28 @@ import { useContext, useState } from "react";
 import { CaptainDataContext } from "../context/UserDataContext.jsx";
 import axios from "axios";
 import MainLogo from "../assests/Logo.png";
+import { Eye, EyeOff } from "lucide-react";
+import ThreeDotsWave from "../components/ThreeDotsWave.jsx";
 
 export const CaptainSignUp = () => {
 
     const [email , setemail] = useState('');
     const [password , setpassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [firstname , setfirstname] = useState('');
     const [lastname , setlastname] = useState('');
     const [vehiclecolor, setvehiclecolor] = useState('');
     const [plate, setplate] = useState('');
     const [capacity, setcapacity] = useState('');
     const [vehicletype, setvehicletype] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {captain , setCaptain} = useContext(CaptainDataContext);
     const navigate = useNavigate();
 
     const SubmitHandler = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
         
         const newCaptain = {
             fullname : {
@@ -36,42 +41,49 @@ export const CaptainSignUp = () => {
             }
         }
 
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/captains/register` , newCaptain)
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/captains/register` , newCaptain)
 
-        if(response.status === 201){
-            const data = response.data;
+            if(response.status === 201){
+                const data = response.data;
 
-            setCaptain(data.captain);
-            localStorage.setItem('captainToken',data.token);
-            navigate('/captain-home')
+                setCaptain(data.captain);
+                localStorage.setItem('captainToken',data.token);
+                navigate('/captain-home')
+            }
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+            setemail('');
+            setpassword('');
+            setfirstname('');
+            setlastname('');
+            setvehiclecolor('');
+            setcapacity('');
+            setvehicletype('');
+            setplate('');
         }
-
-        setemail('');
-        setpassword('');
-        setfirstname('');
-        setlastname('');
-        setvehiclecolor('');
-        setcapacity('');
-        setvehicletype('');
-        setplate('');
     }
 
     return(
         <>
-            <div className="p-7 flex h-screen flex-col justify-between">
+            <div className="p-7 flex h-screen flex-col justify-between bg-primary">
                 <div>
                     <img className="w-16 mb-8" src={MainLogo}/>
-                    <h1 className="text-center text-3xl font-semibold text-blue-600 my-4">Join Us Captain</h1>
+                    <h1 className="text-center text-3xl font-semibold text-accent my-4">Join Us Captain</h1>
                     <form
                         onSubmit={SubmitHandler}
+                        className="overflow-y-auto"
                     >
-                        <h3 className="text-lg font-medium mb-2">What's your name</h3> 
+                        <h3 className="text-lg font-medium mb-2 text-text-primary">What's your name</h3> 
 
                         <div className="flex gap-x-4">
                             <input 
                                 required 
                                 type="text" 
-                                className="bg-[#eeeeee] mb-7 rounded px-4 py-2 border w-1/2 text-lg placeholder:text-base"
+                                className="bg-secondary text-text-primary border-border-color mb-7 rounded px-4 py-2 border w-1/2 text-lg placeholder:text-text-secondary"
                                 placeholder="John"
                                 value={firstname}
                                 onChange={(e) => setfirstname(e.target.value)}
@@ -79,7 +91,7 @@ export const CaptainSignUp = () => {
 
                             <input 
                                 type="text" 
-                                className="bg-[#eeeeee] mb-7 rounded px-4 py-2 border w-1/2 text-lg placeholder:text-base"
+                                className="bg-secondary text-text-primary border-border-color mb-7 rounded px-4 py-2 border w-1/2 text-lg placeholder:text-text-secondary"
                                 placeholder="Doe"
                                 value={lastname}
                                 onChange={(e) => setlastname(e.target.value)}
@@ -87,33 +99,41 @@ export const CaptainSignUp = () => {
                         </div>
 
 
-                        <h3 className="text-lg font-medium mb-2">What's your email</h3> 
+                        <h3 className="text-lg font-medium mb-2 text-text-primary">What's your email</h3> 
                         <input 
                             required 
                             type="email" 
-                            className="bg-[#eeeeee] mb-7 rounded px-4 py-2 border w-full text-lg placeholder:text-base"
+                            className="bg-secondary text-text-primary border-border-color mb-7 rounded px-4 py-2 border w-full text-lg placeholder:text-text-secondary"
                             placeholder="email@exmaple.com"
                             value={email}
                             onChange={(e) => setemail(e.target.value)}
                         />
 
-                        <h3 className="text-lg font-medium mb-2 ">Enter Password</h3>
+                        <h3 className="text-lg font-medium mb-2 text-text-primary">Enter Password</h3>
+                        <div className="relative">
+                            <input 
+                                required
+                                type={showPassword ? "text" : "password"}
+                                className="bg-secondary text-text-primary border-border-color mb-7 rounded px-4 py-2 border w-full text-lg placeholder:text-text-secondary"
+                                placeholder="password"
+                                value={password}
+                                onChange={(e) => setpassword(e.target.value)}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute inset-y-0 right-0 flex items-center px-3 text-text-secondary"
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
 
-                        <input 
-                            required
-                            type="password"
-                            className="bg-[#eeeeee] mb-7 rounded px-4 py-2 border w-full text-lg placeholder:text-base"
-                            placeholder="password"
-                            value={password}
-                            onChange={(e) => setpassword(e.target.value)}
-                        />
-
-                        <h3 className="text-lg font-medium mb-2">Vehicle details</h3>
+                        <h3 className="text-lg font-medium mb-2 text-text-primary">Vehicle details</h3>
                         <div className="flex gap-x-4">
                             <input
                                 type="text"
                                 required
-                                className="bg-[#eeeeee] mb-7 rounded px-4 py-2 border w-1/2 text-lg placeholder:text-base"
+                                className="bg-secondary text-text-primary border-border-color mb-7 rounded px-4 py-2 border w-1/2 text-lg placeholder:text-text-secondary"
                                 placeholder="Color"
                                 value={vehiclecolor}
                                 onChange={(e) => setvehiclecolor(e.target.value)}
@@ -121,7 +141,7 @@ export const CaptainSignUp = () => {
                             <input
                                 type="text"
                                 required
-                                className="bg-[#eeeeee] mb-7 rounded px-4 py-2 border w-1/2 text-lg placeholder:text-base"
+                                className="bg-secondary text-text-primary border-border-color mb-7 rounded px-4 py-2 border w-1/2 text-lg placeholder:text-text-secondary"
                                 placeholder="Plate number"
                                 value={plate}
                                 onChange={(e) =>
@@ -139,7 +159,7 @@ export const CaptainSignUp = () => {
                                 inputMode="numeric"
                                 pattern="[1-9][0-9]*"
                                 required
-                                className="bg-[#eeeeee] mb-7 rounded px-4 py-2 border w-1/2 text-lg placeholder:text-base"
+                                className="bg-secondary text-text-primary border-border-color mb-7 rounded px-4 py-2 border w-1/2 text-lg placeholder:text-text-secondary"
                                 placeholder="Capacity"
                                 value={capacity}
                                 onChange={(e) => {
@@ -151,7 +171,7 @@ export const CaptainSignUp = () => {
                             />
                             <select
                                 required
-                                className="bg-[#eeeeee] mb-7 rounded px-4 py-2 border w-1/2 text-lg"
+                                className="bg-secondary text-text-primary border-border-color mb-7 rounded px-4 py-2 border w-1/2 text-lg"
                                 value={vehicletype}
                                 onChange={(e) => setvehicletype(e.target.value.toLowerCase())}
                             >
@@ -162,12 +182,17 @@ export const CaptainSignUp = () => {
                             </select>
                         </div>
 
-                        <button className="w-full bg-black text-white font-semibold py-3 rounded mt-5">Join Us</button>
+                        <button 
+                            className="w-full bg-accent text-on-accent font-semibold py-3 rounded mt-5 disabled:opacity-70 disabled:cursor-not-allowed"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? <ThreeDotsWave /> : 'Join Us'}
+                        </button>
 
-                        <p className="text-center mt-2">
+                        <p className="text-center mt-2 text-text-secondary">
                             Already Joined?
                             <Link
-                                className="ml-2 text-blue-600 hover:underline"
+                                className="ml-2 text-accent hover:underline"
                                 to='/captain-login'
                             >
                                 SignIn in Account
@@ -175,8 +200,8 @@ export const CaptainSignUp = () => {
                         </p>
                     </form>
                 </div>
-                <div>
-                    <Link className="flex items-center justify-center w-full bg-[#10b461] text-white font-semibold py-3 rounded mt-5" to="/user-signup">Join Us as a User</Link>
+                <div className="mt-4">
+                    <Link className="flex items-center justify-center w-full bg-secondary text-text-primary font-semibold py-3 rounded mt-5 border border-[#2563EB]" to="/user-signup">Join Us as a User</Link>
                 </div>
             </div>
         </>

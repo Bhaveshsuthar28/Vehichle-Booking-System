@@ -1,8 +1,8 @@
 import express from "express";
 import {body} from "express-validator"
-import { getUserProfile, logout, UserLogin, UserRegister, updateUserProfile } from "../Controllers/user.controller.js";
-import { authUser } from "../middlewares/auth.middleware.js";
-import upload from "../config/cloudinary.config.js";
+import { getUserProfile, logout, UserLogin, UserRegister, updateUserProfile, uploadProfileImage } from "./user.controller.js";
+import { authUser } from "../../../middlewares/auth.middleware.js";
+import upload from "../../../config/cloudinary.config.js";
 
 const UserRouter = express.Router();
 

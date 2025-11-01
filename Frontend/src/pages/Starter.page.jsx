@@ -17,13 +17,13 @@ export const Starter = () => {
         alt="Logo"
       />
 
-      <div className="relative bg-white px-8 py-16 rounded-t-3xl shadow-2xl z-10">
-        <h2 className="text-2xl font-bold text-black text-center">
-          Get Started with Uber
+      <div className="relative bg-secondary px-8 py-16 rounded-t-3xl shadow-2xl z-10">
+        <h2 className="text-2xl font-bold text-text-primary text-center">
+          Get Started with Vehichle Booking
         </h2>
         <Link
           to="/user-login"
-          className="flex items-center justify-center w-full bg-black text-white py-3 rounded-lg mt-5 hover:bg-gray-900 transition"
+          className="flex items-center justify-center w-full bg-accent text-on-accent py-3 rounded-lg mt-5 hover:bg-yellow-400 transition"
         >
           Continue
         </Link>

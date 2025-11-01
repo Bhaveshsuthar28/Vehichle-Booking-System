@@ -13,6 +13,9 @@ import { SocketContext } from "../context/SocketDataContext.js";
 import { UserDataContext } from "../context/UserDataContext.jsx";
 import { LiveTracking } from "../components/LiveTracking.jsx";
 import {useDeviceLocation} from "../components/useDeviceLocation.jsx";
+import ThemeSwitcher from "../components/ThemeSwitcher";
+import Sidebar from "../components/Sidebar.jsx";
+import { Menu } from "lucide-react";
 
 export const Home = () => {
 
@@ -37,6 +40,9 @@ export const Home = () => {
     const [rideInfo , setrideInfo] = useState(null);
     const [captainLiveLocation, setCaptainLiveLocation] = useState(null);
     const [isResolvingPickupFromDevice, setIsResolvingPickupFromDevice] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [userData, setUserData] = useState(null);
+
     const isFindTripEnabled = pick.trim().length > 0 && destination.trim().length > 0;
     const {socket} = useContext(SocketContext)
     const {user} = useContext(UserDataContext);
@@ -45,6 +51,62 @@ export const Home = () => {
     const { coords: userCoords } = useDeviceLocation({ enableHighAccuracy: true });
     const userMapLocation = userCoords ? { lat: userCoords.lat, lng: userCoords.lng } : null;
     const GEOAPIFY_API_KEY = import.meta.env.VITE_GEOAPIFY_API_KEY;
+
+    const fetchUserData = async () => {
+        const userToken = localStorage.getItem('userToken');
+        if (!userToken) return;
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/users/profile`, {
+                headers: { Authorization: `Bearer ${userToken}` },
+            });
+            setUserData(response.data);
+        } catch (error) {
+            console.error("Failed to fetch user data", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserData();
+    }, []);
+
+    const handleEditProfile = async (editedData) => {
+        const userToken = localStorage.getItem('userToken');
+        try {
+            const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/users/profile`, editedData, {
+                headers: { Authorization: `Bearer ${userToken}` },
+            });
+            setUserData(response.data);
+        } catch (error) {
+            console.error("Failed to update profile", error);
+        }
+    };
+
+    const handleUploadImage = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('profileImage', file);
+
+            const userToken = localStorage.getItem('userToken');
+            try {
+                const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/users/profile/upload-image`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: `Bearer ${userToken}`,
+                    },
+                });
+                setUserData(response.data);
+            } catch (error) {
+                console.error("Failed to upload image", error);
+            }
+        };
+        input.click();
+    };
 
 
     const fillPickupWithCurrentLocation = useCallback(async() => {
@@ -219,6 +281,11 @@ export const Home = () => {
         }
     }
 
+    const handleLogout = () => {
+        localStorage.removeItem('userToken');
+        navigate('/user-login');
+    }
+
     useEffect(() => {
         if(vehicleRef.current){
             gsap.set(vehicleRef.current , {yPercent : 100});
@@ -310,119 +377,141 @@ export const Home = () => {
 
  
     return(
-        <div className="h-screen relative overflow-hidden">
-            <div className="h-screen w-screen z-0 absolute top-0 left-0">
-                <LiveTracking
-                    pickupAddress={rideInfo ? rideInfo.pickup : null}
-                    destinationAddress={rideInfo ? rideInfo.destination : null}
-                    userLocation={userMapLocation}
-                    captainLocation={rideInfo ? captainLiveLocation : null}
-                    heightClass="h-full"
+        <div className="h-screen relative overflow-hidden flex">
+            {isSidebarOpen && userData && (
+                <Sidebar
+                    user={userData}
+                    tripHistory={userData.tripHistory}
+                    onEditProfile={handleEditProfile}
+                    onUploadImage={handleUploadImage}
                 />
-            </div>
-
-            <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
-                <div className="h-[30%] bg-white p-6 relative flex flex-col justify-center items-center gap-y-4">
-                    {panelOpen && <ChevronDown ref={panelCloseRef} onClick={handlePanelClose} className={`absolute right-5 top-6 cursor-pointer text-xl transition-opacity duration-200 ${panelOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}/>}
-                    <h4 className="text-2xl font-semibold mt-5">Find a trip</h4>
-                    <form
-                        onSubmit={(e) => {
-                            handleSubmit(e)
-                        }}
-                    >
-                        <div className={`absolute h-14 w-1 ${panelOpen ? 'top-[38%] left-10' : 'top-[52%] left-10'} bg-gray-600 rounded-full`}></div>
-                        <input
-                            onClick={() => {
-                                setpanelOpen(true),
-                                setactiveField('pickup')
-                            }}
-                            className="bg-[#eee] pl-12 pr-2 py-2 text-base rounded-lg mt-5 mb-2 w-full"
-                            type="text"
-                            placeholder="Add a pick-up location"
-                            value={pick}
-                            onChange={HandlePickupChange}
-                        />
-
-                        {!pick && panelOpen && (
-                            <button
-                                type="button"
-                                onClick={fillPickupWithCurrentLocation}
-                                disabled={!userCoords || isResolvingPickupFromDevice}
-                                className="absolute right-6 top-[31%] rounded-lg px-3 py-1 text-xs font-semibold text-black transition disabled:cursor-not-allowed disabled:opacity-50 bg-transparent"
-                            >
-                                {isResolvingPickupFromDevice ? <LocateFixed className="opacity-100"/> : <LocateFixed className="opacity-50"/>}
-                            </button>
-                        )}
-
-                        <input
-                            onClick={() => {
-                                setpanelOpen(true),
-                                setactiveField('destination')
-                            }}
-                            className="bg-[#eee] pl-12 pr-2 py-2 text-base rounded-lg mt-3 w-full"
-                            type="text"
-                            placeholder="Enter your destination"
-                            value={destination}
-                            onChange={HandleDestinationChange}
-                        />
-                    </form>
-
-                    {panelOpen && (
-                        <button
-                            onClick={FindTrip}
-                            disabled={!isFindTripEnabled}
-                            className={`flex items-center justify-center w-full bg-[#10b461] text-white font-semibold py-3 rounded-xl mt-5 ${!isFindTripEnabled && 'opacity-50 cursor-not-allowed'}`}
-                        >
-                            Find Trip
-                        </button>
-                    )}
+            )}
+            <div className="flex-1 flex flex-col">
+                <div className="absolute top-4 right-4 z-20">
+                    <ThemeSwitcher />
                 </div>
-
-                <div ref={panelRef} className="bg-white h-0 opacity-0">
-                    <LocationSearchPanel 
-                        suggestions={activeField === 'pickup' ? pickupSuggestions : destinationSuggestions}
-                        setpick={setpick}
-                        setdestination={setdestination}
-                        activeField={activeField}
-                        showUseCurrent={Boolean(userCoords)}
-                        onUseCurrentLocation={fillPickupWithCurrentLocation}
-                        currentLocationLoading={isResolvingPickupFromDevice}
+                <div className="absolute top-4 left-4 z-20 flex items-center gap-4">
+                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="h-10 w-10 flex items-center justify-center rounded-full bg-secondary/10 backdrop-blur-md border border-accent shadow-lg active:bg-accent transition duration-100">
+                        <Menu className="text-accent active:text-on-accent duration-100"/>
+                    </button>
+                    <button onClick={handleLogout} className="bg-accent text-on-accent px-4 py-2 rounded-lg">
+                        Logout
+                    </button>
+                </div>
+                <div className="h-screen w-screen z-0 absolute top-0 left-0">
+                    <LiveTracking
+                        pickupAddress={rideInfo ? rideInfo.pickup : null}
+                        destinationAddress={rideInfo ? rideInfo.destination : null}
+                        userLocation={userMapLocation}
+                        captainLocation={rideInfo ? captainLiveLocation : null}
+                        heightClass="h-full"
                     />
                 </div>
-            </div>
 
-            <div ref={vehicleRef} className="fixed bottom-0 z-10 w-full bg-white px-3 py-10 pt-12">
-                <VehiclePanel Fare={Fare} vehicleType={setvehicleType} setvehiclePanelOpen={setvehiclePanelOpen} setconfirmRidePanel={setconfirmRidePanel}/>
-            </div>
+                <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
+                    <div className="h-[30%] bg-secondary p-6 relative flex flex-col justify-center items-center gap-y-4 rounded-t-3xl">
+                        {panelOpen && <ChevronDown ref={panelCloseRef} onClick={handlePanelClose} className={`absolute right-5 top-6 cursor-pointer text-xl transition-opacity duration-200 ${panelOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} text-text-secondary`}/>}
+                        <h4 className="text-2xl font-semibold mt-5 text-text-primary">Find a trip</h4>
+                        <form
+                            onSubmit={(e) => {
+                                handleSubmit(e)
+                            }}
+                        >
+                            <div className={`absolute h-14 w-1 ${panelOpen ? 'top-[38%] left-10' : 'top-[52%] left-10'} bg-gray-600 rounded-full`}></div>
+                            <input
+                                onClick={() => {
+                                    setpanelOpen(true),
+                                    setactiveField('pickup')
+                                }}
+                                className="bg-primary text-text-primary border border-border-color pl-12 pr-2 py-2 text-base rounded-lg mt-5 mb-2 w-full placeholder:text-text-secondary"
+                                type="text"
+                                placeholder="Add a pick-up location"
+                                value={pick}
+                                onChange={HandlePickupChange}
+                            />
 
-            <div ref={ConfirmRef} className="fixed bottom-0 z-10 w-full bg-white px-3 py-6 pt-12">
-                <ConfirmedVehicle 
-                    CreateRide={CreateRide} 
-                    pick={pick} 
-                    destination={destination} 
-                    Fare={Fare}
-                    vehicleType={vehicleType}
-                    setconfirmRidePanel={setconfirmRidePanel} 
-                    setlookingPanelOpen={setlookingPanelOpen} 
-                    setvehiclePanelOpen={setvehiclePanelOpen}
-                />
-            </div>
-            
-            <div ref={LookingRef} className="fixed bottom-0 z-10 w-full bg-white px-3 py-6 pt-12">
-                <LookingRide
-                    CreateRide={CreateRide}
-                    setlookingPanelOpen={setlookingPanelOpen}
-                    pick={pick} 
-                    destination={destination} 
-                    Fare={Fare}
-                    vehicleType={vehicleType}
-                />
-            </div>
+                            {!pick && panelOpen && (
+                                <button
+                                    type="button"
+                                    onClick={fillPickupWithCurrentLocation}
+                                    disabled={!userCoords || isResolvingPickupFromDevice}
+                                    className="absolute right-6 top-[31%] rounded-lg px-3 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {isResolvingPickupFromDevice ? <LocateFixed className="text-accent"/> : <LocateFixed className="text-text-secondary"/>}
+                                </button>
+                            )}
+
+                            <input
+                                onClick={() => {
+                                    setpanelOpen(true),
+                                    setactiveField('destination')
+                                }}
+                                className="bg-primary text-text-primary border border-border-color pl-12 pr-2 py-2 text-base rounded-lg mt-3 w-full placeholder:text-text-secondary"
+                                type="text"
+                                placeholder="Enter your destination"
+                                value={destination}
+                                onChange={HandleDestinationChange}
+                            />
+                        </form>
+
+                        {panelOpen && (
+                            <button
+                                onClick={FindTrip}
+                                disabled={!isFindTripEnabled}
+                                className={`flex items-center justify-center w-full bg-accent text-on-accent font-semibold py-3 rounded-xl mt-5 ${!isFindTripEnabled && 'opacity-50 cursor-not-allowed'}`}
+                            >
+                                Find Trip
+                            </button>
+                        )}
+                    </div>
+
+                    <div ref={panelRef} className="bg-secondary h-0 opacity-0">
+                        <LocationSearchPanel 
+                            suggestions={activeField === 'pickup' ? pickupSuggestions : destinationSuggestions}
+                            setpick={setpick}
+                            setdestination={setdestination}
+                            activeField={activeField}
+                            showUseCurrent={Boolean(userCoords)}
+                            onUseCurrentLocation={fillPickupWithCurrentLocation}
+                            currentLocationLoading={isResolvingPickupFromDevice}
+                        />
+                    </div>
+                </div>
+
+                <div ref={vehicleRef} className="fixed bottom-0 z-10 w-full bg-secondary px-3 py-10 pt-12 rounded-t-3xl">
+                    <VehiclePanel Fare={Fare} vehicleType={setvehicleType} setvehiclePanelOpen={setvehiclePanelOpen} setconfirmRidePanel={setconfirmRidePanel}/>
+                </div>
+
+                <div ref={ConfirmRef} className="fixed bottom-0 z-10 w-full bg-secondary px-3 py-6 pt-12 rounded-t-3xl">
+                    <ConfirmedVehicle 
+                        CreateRide={CreateRide} 
+                        pick={pick} 
+                        destination={destination} 
+                        Fare={Fare}
+                        vehicleType={vehicleType}
+                        setconfirmRidePanel={setconfirmRidePanel} 
+                        setlookingPanelOpen={setlookingPanelOpen} 
+                        setvehiclePanelOpen={setvehiclePanelOpen}
+                    />
+                </div>
+                
+                <div ref={LookingRef} className="fixed bottom-0 z-10 w-full bg-secondary px-3 py-6 pt-12 rounded-t-3xl">
+                    <LookingRide
+                        CreateRide={CreateRide}
+                        setlookingPanelOpen={setlookingPanelOpen}
+                        pick={pick} 
+                        destination={destination} 
+                        Fare={Fare}
+                        vehicleType={vehicleType}
+                    />
+                </div>
+                 
+                <div ref={WaitingRef} className="fixed bottom-0 z-10 w-full bg-secondary px-3 py-6 pt-12 rounded-t-3xl">
+                    <WaitingForDriver 
+                        rideInfo={rideInfo}
+                        setwaitingDriverPanel={setwaitingDriverPanel}/>
+                </div>
              
-            <div ref={WaitingRef} className="fixed bottom-0 z-10 w-full bg-white px-3 py-6 pt-12">
-                <WaitingForDriver 
-                    rideInfo={rideInfo}
-                    setwaitingDriverPanel={setwaitingDriverPanel}/>
             </div>
              
         </div>

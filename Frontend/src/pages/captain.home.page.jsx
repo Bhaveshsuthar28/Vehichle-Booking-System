@@ -1,5 +1,5 @@
 import { LogOut} from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { CaptainInfo } from "../components/Captain.Info.jsx"
 import { RidePopUp } from "../components/RidePopUp.jsx"
 import { useRef, useState , useEffect , useContext} from "react"
@@ -11,16 +11,85 @@ import {CaptainDataContext} from "../context/UserDataContext.jsx"
 import axios from 'axios'
 import { LiveTracking } from "../components/LiveTracking.jsx"
 import {useDeviceLocation} from "../components/useDeviceLocation.jsx"
+import ThemeSwitcher from "../components/ThemeSwitcher.jsx"
+import Sidebar from "../components/Sidebar.jsx";
+import { Menu } from "lucide-react";
 
 export const CapatainHome = () => {
     const [ridePopupPanel , setridePopupPanel] = useState(false);
     const [ConfirmridePopupPanel , setConfirmridePopupPanel] = useState(false);
     const [ride , setride] = useState(null);
     const [userLiveLocation, setUserLiveLocation] = useState(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [captainData, setCaptainData] = useState(null);
 
     const {socket} = useContext(SocketContext);
     const {captain} = useContext(CaptainDataContext)
     const { coords: captainCoords } = useDeviceLocation({ enableHighAccuracy: true });
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem('captainToken');
+        socket.emit('captain-logout', { captainId: captain._id });
+        navigate('/captain-login');
+    }
+
+    const fetchCaptainData = async () => {
+        const captainToken = localStorage.getItem('captainToken');
+        if (!captainToken) return;
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/captains/profile`, {
+                headers: { Authorization: `Bearer ${captainToken}` },
+            });
+            setCaptainData(response.data);
+        } catch (error) {
+            console.error("Failed to fetch captain data", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCaptainData();
+    }, []);
+
+    const handleEditProfile = async (editedData) => {
+        const captainToken = localStorage.getItem('captainToken');
+        try {
+            const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/captains/profile`, editedData, {
+                headers: { Authorization: `Bearer ${captainToken}` },
+            });
+            setCaptainData(response.data);
+        } catch (error) {
+            console.error("Failed to update profile", error);
+        }
+    };
+
+    const handleUploadImage = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('profileImage', file);
+
+            const captainToken = localStorage.getItem('captainToken');
+            try {
+                const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/captains/profile/upload-image`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: `Bearer ${captainToken}`,
+                    },
+                });
+                setCaptainData(response.data);
+            } catch (error) {
+                console.error("Failed to upload image", error);
+            }
+        };
+        input.click();
+    };
+
 
     useEffect(() => {   
         if (!captain || !socket) return;
@@ -128,42 +197,60 @@ export const CapatainHome = () => {
     }, [ConfirmridePopupPanel])
 
     return(
-        <div className="h-screen">
-            <div className="fixed p-6 top-0 flex items-center justify-between w-screen">
-                <img className="w-16" src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"/>
-                <Link to='/' className="h-10 w-10 flex items-center justify-center rounded-full top-2 left-2 
-                    bg-white/10 backdrop-blur-md border border-blue-900 shadow-lg active:bg-blue-900 transition duration-100">
-                    <LogOut className="text-blue-700 active:text-white duration-100"/>
-                </Link>
-            </div>
-            <div className="h-[60%]">
-                <LiveTracking
-                    pickupAddress={ride ? ride.pickup : null}
-                    destinationAddress={ride ? ride.destination : null}
-                    userLocation={ride ? userLiveLocation : null}
-                    captainLocation={captainCoords ? { lat: captainCoords.lat, lng: captainCoords.lng } : null}
+        <div className="h-screen bg-primary text-text-primary flex">
+            {isSidebarOpen && captainData && (
+                <Sidebar
+                    user={captainData}
+                    stats={captainData.stats}
+                    tripHistory={captainData.tripHistory}
+                    onEditProfile={handleEditProfile}
+                    onUploadImage={handleUploadImage}
+                    isCaptain={true}
                 />
-            </div>
+            )}
+            <div className="flex-1 flex flex-col">
+                <div className="fixed p-6 top-0 flex items-center justify-between w-screen">
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="h-10 w-10 flex items-center justify-center rounded-full bg-secondary/10 backdrop-blur-md border border-accent shadow-lg active:bg-accent transition duration-100">
+                            <Menu className="text-accent active:text-on-accent duration-100"/>
+                        </button>
+                        <img className="w-16" src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"/>
+                        <ThemeSwitcher />
+                    </div>
+                    <button onClick={handleLogout} className="h-10 w-10 flex items-center justify-center rounded-full top-2 left-2 
+                        bg-secondary/10 backdrop-blur-md border border-accent shadow-lg active:bg-accent transition duration-100">
+                        <LogOut className="text-accent active:text-on-accent duration-100"/>
+                    </button>
+                </div>
+                <div className="h-[60%]">
+                    <LiveTracking
+                        pickupAddress={ride ? ride.pickup : null}
+                        destinationAddress={ride ? ride.destination : null}
+                        userLocation={ride ? userLiveLocation : null}
+                        captainLocation={captainCoords ? { lat: captainCoords.lat, lng: captainCoords.lng } : null}
+                    />
+                </div>
 
-            <div className="h-[40%] p-6">
-                <CaptainInfo/>
-            </div>
+                <div className="h-[40%] p-6 bg-secondary">
+                    <CaptainInfo/>
+                </div>
 
-            <div ref={ridepopUpRef} className="fixed bottom-0 z-10 w-full bg-white px-3 py-6 pt-12">
-                <RidePopUp 
-                    setridePopupPanel={setridePopupPanel} 
-                    setConfirmridePopupPanel={setConfirmridePopupPanel}
-                    ride={ride}
-                    confirmRide={confirmRide}
-                />
-            </div>
+                <div ref={ridepopUpRef} className="fixed bottom-0 z-10 w-full bg-secondary px-3 py-6 pt-12 rounded-t-3xl">
+                    <RidePopUp 
+                        setridePopupPanel={setridePopupPanel} 
+                        setConfirmridePopupPanel={setConfirmridePopupPanel}
+                        ride={ride}
+                        confirmRide={confirmRide}
+                    />
+                </div>
 
-            <div ref={ConfirmRideRef} className="fixed bottom-0 h-screen z-10 w-full bg-white px-3 py-6 pt-12">
-                <ConfirmRidePopup 
-                    setConfirmridePopupPanel={setConfirmridePopupPanel} 
-                    setridePopupPanel={setridePopupPanel}
-                    ride={ride}
-                />
+                <div ref={ConfirmRideRef} className="fixed bottom-0 h-screen z-10 w-full bg-secondary px-3 py-6 pt-12">
+                    <ConfirmRidePopup 
+                        setConfirmridePopupPanel={setConfirmridePopupPanel} 
+                        setridePopupPanel={setridePopupPanel}
+                        ride={ride}
+                    />
+                </div>
             </div>
         </div>
     )

@@ -1,6 +1,7 @@
 import { validationResult } from "express-validator";
-import { CaptainModel } from "../Models/captain.model.js";
-import { createCaptain } from "../services/captain.service.js";
+import { CaptainModel } from "../../../Models/captain.model.js";
+import { createCaptain } from "./captain.service.js";
+import { blackListToken } from "../../../Models/blackListToken.model.js";
 
 const CaptainRegister = async(req , res) => {
     const errors = validationResult(req);
@@ -72,7 +73,8 @@ const CaptainLogin = async(req , res , next) => {
 
 const GetCaptainProfile = async(req , res) => {
     try {
-        return res.status(201).json(req.captain)
+        const captain = await CaptainModel.findById(req.captain._id).populate('tripHistory');
+        return res.status(201).json(captain)
     } catch (error) {
         return res.status(401).json({message : error.message});
     }
@@ -80,7 +82,7 @@ const GetCaptainProfile = async(req , res) => {
 
 const updateCaptainProfile = async (req, res) => {
     try {
-        const { firstname, lastname, phone } = req.body;
+        const { firstname, lastname, phone } = req.body.fullname;
         const updatedCaptain = await CaptainModel.findByIdAndUpdate(
             req.captain._id,
             {
@@ -114,11 +116,16 @@ const uploadProfileImage = async (req, res) => {
 
 const Captainlogout = async(req , res) => {
     try {
-        const token = req.cookies.token || req.headers.authorization.split(' ')[1];
+        const token = req.headers.authorization.split(' ')[1];
 
         const captain = await CaptainModel.findById(req.captain._id);
         if (captain) {
             captain.status = 'inactive';
+            if (captain.sessionStartTime) {
+                const sessionDuration = (new Date() - captain.sessionStartTime) / (1000 * 60 * 60); // in hours
+                captain.stats.hoursOnline += sessionDuration;
+                captain.sessionStartTime = null;
+            }
             await captain.save();
         }
 
@@ -130,5 +137,4 @@ const Captainlogout = async(req , res) => {
     }
 }
 
-export {CaptainRegister, CaptainLogin , GetCaptainProfile , Captainlogout, uploadProfileImage};
-
+export {CaptainRegister, CaptainLogin , GetCaptainProfile , Captainlogout, uploadProfileImage, updateCaptainProfile};
