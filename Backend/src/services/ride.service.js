@@ -1,7 +1,7 @@
 import { randomInt } from "crypto";
-import { RideModel } from "../../../Models/Ride.model.js";
-import { GetDistanceTime} from "../maps/maps.service.js"
-import {sendMessageToSocketId} from '../../../../socket.js'
+import { RideModel } from "../Models/Ride.model.js";
+import { GetDistanceTime} from "../services/maps.service.js"
+import {sendMessageToSocketId} from '../../socket.js'
 
 
 export const GetFare = async(pickup , destination) => {

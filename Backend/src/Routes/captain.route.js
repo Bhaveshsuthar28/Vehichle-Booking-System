@@ -1,13 +1,9 @@
 import express from "express"
 import {body} from "express-validator"
-import { CaptainRegister , CaptainLogin, GetCaptainProfile, Captainlogout, updateCaptainProfile} from "../Controllers/captain.controller.js";
+import { CaptainRegister , CaptainLogin, GetCaptainProfile, Captainlogout} from "../Controllers/captain.controller.js";
 import { authCapatain } from "../middlewares/auth.middleware.js";
-import upload from "../config/cloudinary.config.js";
 
 const CaptainRouter = express.Router();
-
-CaptainRouter.put('/profile', authCapatain, updateCaptainProfile);
-CaptainRouter.post('/profile/upload-image', authCapatain, upload.single('profileImage'), uploadProfileImage);
 
 CaptainRouter.post('/register' , [
     body('email').isEmail().withMessage('invaild email'),

@@ -29,14 +29,6 @@ const userSchema = new mongoose.Schema({
     socketId: {
         type: String,
     },
-    profileImage: {
-        type: String,
-        default: ''
-    },
-    tripHistory: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Ride'
-    }]
     
 } , 
     {
@@ -57,4 +49,4 @@ userSchema.statics.hashpassword = async function (password){
     return await bcrypt.hash(password , 10);
 }
 
-export const userModel = mongoose.model('user', userSchema);
+export const userModel = mongoose.model('user', userSchema); 

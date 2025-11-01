@@ -29,39 +29,7 @@ const CaptainSchema = new mongoose.Schema({
     socketId: {
         type: String,
     }, 
-    profileImage: {
-        type: String,
-        default: ''
-    },
-    tripHistory: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Ride'
-    }],
-    stats: {
-        hoursOnline: {
-            type: Number,
-            default: 0
-        },
-        totalTrips: {
-            type: Number,
-            default: 0
-        },
-        totalDistance: {
-            type: Number,
-            default: 0
-        },
-        totalDuration: {
-            type: Number,
-            default: 0
-        },
-        avgSpeed: {
-            type: Number,
-            default: 0
-        }
-    },
-    sessionStartTime: {
-        type: Date,
-    },
+
     status : {
         type : String,
         enum : ['active', 'inactive'],

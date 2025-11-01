@@ -30,9 +30,6 @@ const CaptainRegister = async(req , res) => {
 
         const token = captain.generateAuthToken();
 
-        captain.status = 'active';
-        await captain.save();
-
         res.status(201).json({token , captain});
     } catch (error) {
         return res.status(401).json({message : error.message})
@@ -58,9 +55,6 @@ const CaptainLogin = async(req , res , next) => {
 
         const token = captain.generateAuthToken();
 
-        captain.status = 'active';
-        await captain.save();
-
         res.cookie('token' , token)
 
         res.status(201).json({token , captain});
@@ -78,49 +72,9 @@ const GetCaptainProfile = async(req , res) => {
     }
 }
 
-const updateCaptainProfile = async (req, res) => {
-    try {
-        const { firstname, lastname, phone } = req.body;
-        const updatedCaptain = await CaptainModel.findByIdAndUpdate(
-            req.captain._id,
-            {
-                'fullname.firstname': firstname,
-                'fullname.lastname': lastname,
-                phone,
-            },
-            { new: true }
-        );
-        res.status(200).json(updatedCaptain);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
-
-const uploadProfileImage = async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded.' });
-        }
-        const captain = await CaptainModel.findByIdAndUpdate(
-            req.captain._id,
-            { profileImage: req.file.path },
-            { new: true }
-        );
-        res.status(200).json(captain);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
-
 const Captainlogout = async(req , res) => {
     try {
         const token = req.cookies.token || req.headers.authorization.split(' ')[1];
-
-        const captain = await CaptainModel.findById(req.captain._id);
-        if (captain) {
-            captain.status = 'inactive';
-            await captain.save();
-        }
 
         await blackListToken.create({token});
         res.clearCookie('token');
@@ -130,5 +84,5 @@ const Captainlogout = async(req , res) => {
     }
 }
 
-export {CaptainRegister, CaptainLogin , GetCaptainProfile , Captainlogout, uploadProfileImage};
+export {CaptainRegister, CaptainLogin , GetCaptainProfile , Captainlogout};
 

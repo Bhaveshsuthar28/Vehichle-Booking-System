@@ -1,13 +1,9 @@
 import express from "express";
 import {body} from "express-validator"
-import { getUserProfile, logout, UserLogin, UserRegister, updateUserProfile } from "../Controllers/user.controller.js";
+import { getUserProfile, logout, UserLogin, UserRegister } from "../Controllers/user.controller.js";
 import { authUser } from "../middlewares/auth.middleware.js";
-import upload from "../config/cloudinary.config.js";
 
 const UserRouter = express.Router();
-
-UserRouter.put('/profile', authUser, updateUserProfile);
-UserRouter.post('/profile/upload-image', authUser, upload.single('profileImage'), uploadProfileImage);
 
 UserRouter.post('/register' , [
     body('email').isEmail().withMessage('invaild email'),

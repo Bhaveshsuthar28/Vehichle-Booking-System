@@ -66,22 +66,6 @@ const getUserProfile = async(req , res , next) => {
     }
 }
 
-const uploadProfileImage = async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded.' });
-        }
-        const user = await userModel.findByIdAndUpdate(
-            req.user._id,
-            { profileImage: req.file.path },
-            { new: true }
-        );
-        res.status(200).json(user);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
-
 const logout = async(req , res) => {
     try {
         const token = req.cookies.token || req.headers.authorization.split(' ')[1];
@@ -94,22 +78,4 @@ const logout = async(req , res) => {
     }
 }
 
-const updateUserProfile = async (req, res) => {
-    try {
-        const { firstname, lastname, phone } = req.body;
-        const updatedUser = await userModel.findByIdAndUpdate(
-            req.user._id,
-            {
-                'fullname.firstname': firstname,
-                'fullname.lastname': lastname,
-                phone,
-            },
-            { new: true }
-        );
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
-
-export {UserRegister , UserLogin , getUserProfile , logout, uploadProfileImage};
+export {UserRegister , UserLogin , getUserProfile , logout}; 

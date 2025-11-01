@@ -34,7 +34,7 @@ export const initializeSocket = (server) => {
                 if (userType === 'user') {
                     await userModel.findByIdAndUpdate(userId, { socketId: socket.id });
                 } else if (userType === 'Captain') {
-                    await CaptainModel.findByIdAndUpdate(userId, { socketId: socket.id, status: 'active', sessionStartTime: new Date() });
+                    await CaptainModel.findByIdAndUpdate(userId, { socketId: socket.id });
 
 
                     onlineCaptainSockets.set(String(userId), socket.id);
@@ -49,23 +49,6 @@ export const initializeSocket = (server) => {
             } catch (error) {
                 console.error('Error in join event:', error);
                 socket.emit('error', { message: 'Failed to join' });
-            }
-        });
-
-        socket.on('captain-logout', async (data) => {
-            const { captainId } = data;
-            try {
-                const captain = await CaptainModel.findById(captainId);
-                if (captain && captain.sessionStartTime) {
-                    const sessionDuration = (new Date() - captain.sessionStartTime) / (1000 * 60 * 60); // in hours
-                    captain.stats.hoursOnline += sessionDuration;
-                    captain.sessionStartTime = null;
-                }
-                captain.status = 'inactive';
-                await captain.save();
-                console.log(`Captain ${captainId} status updated to inactive`);
-            } catch (error) {
-                console.error('Error updating captain status on logout:', error);
             }
         });
 
@@ -135,25 +118,13 @@ export const initializeSocket = (server) => {
             }
         });
 
-        socket.on('disconnect', async () => {
+        socket.on('disconnect', () => {
             console.log(`Client disconnected: ${socket.id}`);
 
             for (const [captainId, sId] of onlineCaptainSockets.entries()) {
                 if (sId === socket.id) {
                     onlineCaptainSockets.delete(captainId);
-                    try {
-                        const captain = await CaptainModel.findById(captainId);
-                        if (captain && captain.sessionStartTime) {
-                            const sessionDuration = (new Date() - captain.sessionStartTime) / (1000 * 60 * 60); // in hours
-                            captain.stats.hoursOnline += sessionDuration;
-                            captain.sessionStartTime = null;
-                        }
-                        captain.status = 'inactive';
-                        await captain.save();
-                        console.log(`Captain ${captainId} is now offline and status updated to inactive`);
-                    } catch (error) {
-                        console.error('Error updating captain status on disconnect:', error);
-                    }
+                    console.log(`Captain ${captainId} is now offline`);
                 }
             }
         });

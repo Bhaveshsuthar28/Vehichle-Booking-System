@@ -5,31 +5,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-primary: #FFFFFF; /* white */
-  --color-secondary: #F3F4F6; /* light gray */
-  --color-accent: #2563EB; /* vibrant blue */
-  --color-text-primary: #1F2937; /* almost black */
-  --color-text-secondary: #6B7280; /* gray */
-  --color-border-color: #E5E7EB; /* light gray for borders */
-  --color-text-on-accent: #FFFFFF; /* white */
-}
-
-.dark {
-  --color-primary: #111827; /* almost black */
-  --color-secondary: #1F2937; /* darker gray */
-  --color-accent: #3B82F6; /* lighter blue */
-  --color-text-primary: #F9FAFB; /* very light gray */
-  --color-text-secondary: #D1D5DB; /* light gray */
-  --color-border-color: #374151; /* gray for borders */
-  --color-text-on-accent: #FFFFFF; /* white */
-}
-
 * {
     font-family: "Outfit", sans-serif;
-}
-
-body {
-    @apply bg-primary text-text-primary;
-    transition: background-color 0.3s ease, color 0.3s ease;
 }
