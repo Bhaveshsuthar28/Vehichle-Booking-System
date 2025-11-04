@@ -1,13 +1,13 @@
 import {useRef, useState , useEffect , useContext , useCallback} from "react";
 import {useGSAP} from "@gsap/react"
 import gsap from "gsap";
-import { ChevronDown , Home as HomeIcon , LocateFixed} from 'lucide-react';
+import { ChevronDown , LocateFixed} from 'lucide-react';
 import { LocationSearchPanel } from "../components/LocationPanel.components.jsx";
 import {VehiclePanel} from '../components/Vehicle.price.components.jsx'
 import { ConfirmedVehicle } from "../components/Confirmed.vehicle.jsx";
 import { LookingRide } from "../components/LookingForDriver.jsx";
 import { WaitingForDriver } from "../components/WaitingForDriverPanel.jsx";
-import { Link , useNavigate} from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 import axios from 'axios'
 import { SocketContext } from "../context/SocketDataContext.js";
 import { UserDataContext } from "../context/UserDataContext.jsx";
@@ -322,15 +322,15 @@ export const Home = () => {
             </div>
 
             <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
-                <div className="h-[30%] bg-white p-6 relative flex flex-col justify-center items-center gap-y-4">
+                <div className="h-[30%] bg-white p-6 relative flex flex-col justify-center items-center">
                     {panelOpen && <ChevronDown ref={panelCloseRef} onClick={handlePanelClose} className={`absolute right-5 top-6 cursor-pointer text-xl transition-opacity duration-200 ${panelOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}/>}
-                    <h4 className="text-2xl font-semibold mt-5">Find a trip</h4>
+                    <h4 className="text-2xl font-semibold">Find a trip</h4>
                     <form
                         onSubmit={(e) => {
                             handleSubmit(e)
                         }}
                     >
-                        <div className={`absolute h-14 w-1 ${panelOpen ? 'top-[38%] left-10' : 'top-[52%] left-10'} bg-gray-600 rounded-full`}></div>
+                        <div className={`absolute h-14 w-1 ${panelOpen ? 'top-[38%] left-10' : 'top-[50%] left-10'} bg-gray-600 rounded-full`}></div>
                         <input
                             onClick={() => {
                                 setpanelOpen(true),

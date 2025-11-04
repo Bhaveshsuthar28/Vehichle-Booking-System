@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
-import bgLogo from "../assests/Start.bg.png";
 import MainLogo from "../assests/Logo.png";
 
 export const Starter = () => {
   return (
     <div className="relative h-screen w-full flex flex-col justify-between overflow-hidden">
       <img
-        src={bgLogo}
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPZ1NUv-CPmcE-gXyxs7_DNliLsGwUwduZ9A&s"
         alt="bg"
         className="absolute inset-0 w-full h-full object-cover"
       />
