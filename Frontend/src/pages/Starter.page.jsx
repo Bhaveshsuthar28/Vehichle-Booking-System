@@ -5,7 +5,7 @@ export const Starter = () => {
   return (
     <div className="relative h-screen w-full flex flex-col justify-between overflow-hidden">
       <img
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPZ1NUv-CPmcE-gXyxs7_DNliLsGwUwduZ9A&s"
+        src="https://files.123freevectors.com/wp-content/original/107763-royal-blue-abstract.jpg"
         alt="bg"
         className="absolute inset-0 w-full h-full object-cover"
       />
